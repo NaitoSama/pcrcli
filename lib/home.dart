@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StartUp extends StatefulWidget {
   const StartUp({super.key});
@@ -11,13 +15,33 @@ class StartUp extends StatefulWidget {
 class _StartUpState extends State<StartUp> {
   final ipAdd = TextEditingController();
   final port = TextEditingController();
-  String? getUrl(String ip,String port){
+  Future<bool> getUrl(String ip,String port) async {
     if ( ip=='' || port=='' ){
-      return '';
+      return false;
     }
-    else{
-      return ip+':'+port;
+    try {
+      Uri uri = Uri.parse('http://$ip:$port/test');
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        // 返回真，表示响应代码为200
+        return true;
+      } else {
+        // 返回假，表示响应代码非200
+        return false;
+      }
+    } catch (e) {
+      // 请求过程中发生异常，也返回假
+      return false;
     }
+  }
+  void setUrl(String ip,String port) async {
+    String url = 'http://$ip:$port';
+    // Load and obtain the shared preferences for this app.
+    final prefs = await SharedPreferences.getInstance();
+
+    // Save the counter value to persistent storage under the 'counter' key.
+    await prefs.setString('url', url);
   }
 
   @override
@@ -160,10 +184,16 @@ class _StartUpState extends State<StartUp> {
                             ),
                           ),
 
-                          onPressed: () {
+                          onPressed: () async {
                             // 按钮被点击时执行的操作
+                            final prefs = await SharedPreferences.getInstance();
+                            String? url = await prefs.getString('url');
+                            print(url);
                             String address = ipAdd.text + ':' + port.text;
-                            print(getUrl(ipAdd.text,port.text));
+                            bool result = await getUrl(ipAdd.text,port.text);
+                            if(result){
+                              setUrl(ipAdd.text, port.text);
+                            }
                           },
 
                           child: const Text(
