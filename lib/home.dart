@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'login.dart';
+
 class StartUp extends StatefulWidget {
   const StartUp({super.key});
 
@@ -186,13 +188,18 @@ class _StartUpState extends State<StartUp> {
 
                           onPressed: () async {
                             // 按钮被点击时执行的操作
-                            final prefs = await SharedPreferences.getInstance();
-                            String? url = await prefs.getString('url');
-                            print(url);
-                            String address = ipAdd.text + ':' + port.text;
+                            // final prefs = await SharedPreferences.getInstance();
+                            // String? url = await prefs.getString('url');
+                            // print(url);
+                            // String address = ipAdd.text + ':' + port.text;
                             bool result = await getUrl(ipAdd.text,port.text);
                             if(result){
                               setUrl(ipAdd.text, port.text);
+                              // todo go to login page
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => login()),
+                              );
                             }
                           },
 
