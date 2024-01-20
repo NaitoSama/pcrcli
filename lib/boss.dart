@@ -236,55 +236,13 @@ class _bossCMDState extends State<bossCMD> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-          content: Center(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: const [
-                  BoxShadow(
-                    blurRadius: 4,
-                    color: Color(0x520E151B),
-                    offset: Offset(0, 2),
-                  )
-                ],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 2.0,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Text('造成伤害：',style: TextStyle(fontSize: 10),),
-                          TextFormField(
-                            controller: _damage,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),Expanded(
-                    flex: 2,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 2.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-
+      backgroundColor: Colors.white,
+      content: Container(
+        constraints: BoxConstraints(
+          maxWidth: 200.0, // 设置最大宽度
+        ),
+        child: Text('111'),
+      )
     );
   }
 }
