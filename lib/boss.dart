@@ -20,7 +20,7 @@ class _bossPageState extends State<bossPage> {
         backgroundColor: Color(0xFFF1F4F8),
         automaticallyImplyLeading: false,
         title: Text(
-          'Order History',
+          'Clan Battle',
         ),
         actions: [],
         centerTitle: false,
@@ -40,7 +40,7 @@ class _bossPageState extends State<bossPage> {
           //   ),
           // ),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 8),
+            padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
             child: Container(
               width: MediaQuery.sizeOf(context).width * 0.8,
               height: MediaQuery.sizeOf(context).height * 0.2,
