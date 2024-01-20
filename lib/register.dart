@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pcrcli/register.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'boss.dart';
 
 class register extends StatefulWidget {
   const register({super.key});
@@ -12,6 +18,63 @@ class register extends StatefulWidget {
 class _registerState extends State<register> {
   final username = TextEditingController();
   final password = TextEditingController();
+  final code = TextEditingController();
+
+  Future<bool> sendRegisterRequest(String username, String password, String code) async {
+    var prefs = await SharedPreferences.getInstance();
+    var uri = prefs.getString('url');
+    final url = Uri.parse('${uri!}/register'); // 替换成你的登录接口URL
+    final Map<String, String> headers = {'Content-Type': 'application/json'};
+
+    final Map<String, dynamic> requestBody = {
+      'username': username,
+      'password': password,
+      'register_code':code,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        // 注册成功，保存cookie值
+        String cookie = response.headers['set-cookie'] ?? '';
+        var temp = cookie.split('pekoToken=');
+        cookie = temp[temp.length-1].split(';')[0];
+        await prefs.setString('token', cookie);
+        print('Login successful. Cookie: $cookie');
+        return true;
+      } else {
+        // 注册失败，处理错误
+        print('Login failed. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      // 请求发生异常
+      print('Error during login request: $error');
+      return false;
+    }
+  }
+  Future<void> wrongRegisterDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("注册失败"),
+          content: Text("检查名字是否含有“|”符号，名字是否重复"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("确认"),
+              onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +190,43 @@ class _registerState extends State<register> {
                   // Container(
                   //   height: 20,
                   // ),
+                  TextFormField(
+                    controller: code,
+                    obscureText: false,
+                    decoration: InputDecoration(
+                      labelText: 'Register code',
+                      hintText: 'Enter code...',
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Color(0xFF59BCF8),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Color(0x00000000),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Color(0x00000000),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Color(0x00000000),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
+                    ),
+                  ),
                   Container(
                       width: 160,
                       height: 60,
@@ -150,10 +250,14 @@ class _registerState extends State<register> {
 
                           onPressed: () async {
                             // 按钮被点击时执行的操作
-                            // final prefs = await SharedPreferences.getInstance();
-                            // String? url = await prefs.getString('url');
-                            // print(url);
-                            // String address = ipAdd.text + ':' + port.text;
+                            if (await sendRegisterRequest(username.text, password.text, code.text)){
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => bossPage()),
+                              );
+                            }else{
+                              wrongRegisterDialog();
+                            }
 
                           },
 

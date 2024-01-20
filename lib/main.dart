@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pcrcli/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'boss.dart';
 import 'home.dart';
 import 'login.dart';
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         home = const login();
         break;
       case 2:
-        home = const register();
+        home = const bossPage();
         break;
       default:
         break;

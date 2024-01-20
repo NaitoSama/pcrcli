@@ -5,6 +5,8 @@ import 'package:pcrcli/register.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'boss.dart';
+
 class login extends StatefulWidget {
   const login({super.key});
 
@@ -52,7 +54,23 @@ class _loginState extends State<login> {
       return false;
     }
   }
-
+  Future<void> wrongLoginDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("登陆失败"),
+          content: Text("检查账号密码是否正确"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("确认"),
+              onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,7 +209,12 @@ class _loginState extends State<login> {
                           onPressed: () async {
                             // 按钮被点击时执行的操作
                             if(await sendLoginRequest(username.text,password.text)){
-
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => bossPage()),
+                              );
+                            }else{
+                              wrongLoginDialog();
                             }
 
                           },

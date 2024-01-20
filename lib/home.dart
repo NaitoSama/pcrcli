@@ -45,6 +45,23 @@ class _StartUpState extends State<StartUp> {
     // Save the counter value to persistent storage under the 'counter' key.
     await prefs.setString('url', url);
   }
+  Future<void> wrongAddDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("服务器连接失败"),
+          content: Text("检查服务器是否运行，网络是否可达"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("确认"),
+              onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
 
@@ -203,6 +220,8 @@ class _StartUpState extends State<StartUp> {
                                 context,
                                 MaterialPageRoute(builder: (context) => login()),
                               );
+                            }else{
+                              wrongAddDialog();
                             }
                           },
 
