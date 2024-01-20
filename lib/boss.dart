@@ -8,43 +8,25 @@ class bossPage extends StatefulWidget {
 }
 
 class _bossPageState extends State<bossPage> {
+  final TextEditingController _damage = TextEditingController();
+  final TextEditingController _revise = TextEditingController();
 
-  Future<void> bossCMD(int bossID){
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-                  child: Container(
-                    width: MediaQuery.sizeOf(context).width * 0.76,
-                    height: MediaQuery.sizeOf(context).height * 0.25,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: const [
-                        BoxShadow(
-                          blurRadius: 4,
-                          color: Color(0x520E151B),
-                          offset: Offset(0, 2),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      scrollDirection: Axis.vertical,
-                      children: [],
-                    ),
-                  ),
-                );
-        }
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('主页面'),
-      // ),
+      appBar: AppBar(
+        backgroundColor: Color(0xFFF1F4F8),
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Order History',
+        ),
+        actions: [],
+        centerTitle: false,
+        elevation: 0,
+      ),
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -58,58 +40,65 @@ class _bossPageState extends State<bossPage> {
           //   ),
           // ),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0, 12, 0, 0),
-            child: ListView(
-              padding: EdgeInsets.zero,
-              primary: false,
-              shrinkWrap: true,
-              scrollDirection: Axis.vertical,
-              children: [
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 8),
-                  child: Container(
-                    width: MediaQuery.sizeOf(context).width * 0.8,
-                    height: MediaQuery.sizeOf(context).height * 0.3,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 4,
-                          color: Color(0x520E151B),
-                          offset: Offset(0, 2),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      scrollDirection: Axis.vertical,
-                      children: [],
-                    ),
-                  ),
-                ),
-              ],
+            padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 8),
+            child: Container(
+              width: MediaQuery.sizeOf(context).width * 0.8,
+              height: MediaQuery.sizeOf(context).height * 0.2,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 4,
+                    color: Color(0x520E151B),
+                    offset: Offset(0, 2),
+                  )
+                ],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ListView(
+                padding: EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
+                scrollDirection: Axis.vertical,
+                children: [
+                  Text('123321'),
+                  Text('1234567'),
+                  Text('123321'),
+                  Text('1234567'),
+                  Text('123321'),
+                  Text('1234567'),
+                  Text('123321'),
+                  Text('1234567'),
+                  Text('123321'),
+                  Text('1234567'),
+                  Text('123321'),
+                  Text('1234567'),
+                ],
+              ),
             ),
           ),
           // Boss 状态格子
           GestureDetector(
-              onTap: () => bossCMD(1),
+              onTap: () => showDialog(
+          context: context,
+          builder: (BuildContext context) {
+          return bossCMD(bossID: 1,);
+          },
+          ),
               child: bossCard(bossName: 'Boss 1',bossImg: 'images/1.webp',)
           ),
           GestureDetector(
-              onTap: () => bossCMD(2),
+              onTap: () => bossCMD(bossID: 2,),
               child: bossCard(bossName: 'Boss 2',bossImg: 'images/2.webp',)
           ),
           GestureDetector(
-              onTap: () => bossCMD(3),
+              onTap: () => bossCMD(bossID: 3,),
               child: bossCard(bossName: 'Boss 3',bossImg: 'images/3.webp',)
           ),
           GestureDetector(
-              onTap: () => bossCMD(4),
+              onTap: () => bossCMD(bossID: 4,),
               child: bossCard(bossName: 'Boss 4',bossImg: 'images/4.webp',)
           ),
           GestureDetector(
-              onTap: () => bossCMD(5),
+              onTap: () => bossCMD(bossID: 5,),
               child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.webp',)
           ),
         ],
@@ -224,6 +213,79 @@ class _bossCardState extends State<bossCard> {
         ),
       );
 
+  }
+}
+
+class bossCMD extends StatefulWidget {
+  final int bossID;
+  const bossCMD({super.key, required this.bossID});
+
+  @override
+  State<bossCMD> createState() => _bossCMDState();
+}
+
+class _bossCMDState extends State<bossCMD> {
+  late int bossID;
+  final TextEditingController _damage = TextEditingController();
+  final TextEditingController _revise = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    bossID = widget.bossID;
+  }
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+          content: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 4,
+                    color: Color(0x520E151B),
+                    offset: Offset(0, 2),
+                  )
+                ],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('造成伤害：',style: TextStyle(fontSize: 10),),
+                          TextFormField(
+                            controller: _damage,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),Expanded(
+                    flex: 2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black,
+                          width: 2.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+
+    );
   }
 }
 
