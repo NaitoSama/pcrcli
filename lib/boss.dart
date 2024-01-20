@@ -8,6 +8,7 @@ class bossPage extends StatefulWidget {
 }
 
 class _bossPageState extends State<bossPage> {
+
   Future<void> bossCMD(int bossID){
     return showDialog(
         context: context,
@@ -92,13 +93,25 @@ class _bossPageState extends State<bossPage> {
           ),
           // Boss 状态格子
           GestureDetector(
-            onTap: () => bossCMD(1),
-            child: bossCard(bossName: 'Boss 1',bossImg: 'images/1.webp',)
+              onTap: () => bossCMD(1),
+              child: bossCard(bossName: 'Boss 1',bossImg: 'images/1.webp',)
           ),
-          bossCard(bossName: 'Boss 2',bossImg: 'images/2.webp',),
-          bossCard(bossName: 'Boss 3',bossImg: 'images/3.webp',),
-          bossCard(bossName: 'Boss 4',bossImg: 'images/4.webp',),
-          bossCard(bossName: 'Boss 5',bossImg: 'images/5.webp',),
+          GestureDetector(
+              onTap: () => bossCMD(2),
+              child: bossCard(bossName: 'Boss 2',bossImg: 'images/2.webp',)
+          ),
+          GestureDetector(
+              onTap: () => bossCMD(3),
+              child: bossCard(bossName: 'Boss 3',bossImg: 'images/3.webp',)
+          ),
+          GestureDetector(
+              onTap: () => bossCMD(4),
+              child: bossCard(bossName: 'Boss 4',bossImg: 'images/4.webp',)
+          ),
+          GestureDetector(
+              onTap: () => bossCMD(5),
+              child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.webp',)
+          ),
         ],
       ),
     );
