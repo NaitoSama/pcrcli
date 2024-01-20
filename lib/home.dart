@@ -47,6 +47,7 @@ class _StartUpState extends State<StartUp> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -166,8 +167,10 @@ class _StartUpState extends State<StartUp> {
                     //   height: 20,
                     // ),
                     Container(
-                      width: MediaQuery.sizeOf(context).width * 0.6,
-                      height: MediaQuery.sizeOf(context).height * 0.1,
+                      // width: MediaQuery.sizeOf(context).width * 0.6,
+                      // height: MediaQuery.sizeOf(context).height * 0.1,
+                      width: 160,
+                      height: 60,
                       decoration: const BoxDecoration(
                       ),
                       child: Padding(

@@ -128,8 +128,8 @@ class _registerState extends State<register> {
                   //   height: 20,
                   // ),
                   Container(
-                      width: MediaQuery.sizeOf(context).width * 0.6,
-                      height: MediaQuery.sizeOf(context).height * 0.1,
+                      width: 160,
+                      height: 60,
                       decoration: const BoxDecoration(
                       ),
                       child: Padding(

@@ -1,17 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:pcrcli/register.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home.dart';
+import 'login.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  int routeNum = 0;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? url = prefs.getString('url');
+  if (!(url == null || url == '')){
+    routeNum = 1;
+  }
+  String? token = prefs.getString('token');
+  if (!(token == null || token == '')){
+    routeNum = 2;
+  }
+  runApp(MyApp(routeNum));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  final int routeNum;
+  const MyApp(this.routeNum, {super.key});
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    StatefulWidget home = const StartUp();
+    switch(routeNum){
+      case 0:
+        break;
+      case 1:
+        home = const login();
+        break;
+      case 2:
+        home = const register();
+        break;
+      default:
+        break;
+    }
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -33,7 +60,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const StartUp(),
+      home: home,
     );
   }
 }
