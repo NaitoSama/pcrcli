@@ -8,6 +8,36 @@ class bossPage extends StatefulWidget {
 }
 
 class _bossPageState extends State<bossPage> {
+  Future<void> bossCMD(int bossID){
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+                  child: Container(
+                    width: MediaQuery.sizeOf(context).width * 0.76,
+                    height: MediaQuery.sizeOf(context).height * 0.25,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 4,
+                          color: Color(0x520E151B),
+                          offset: Offset(0, 2),
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      scrollDirection: Axis.vertical,
+                      children: [],
+                    ),
+                  ),
+                );
+        }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +91,10 @@ class _bossPageState extends State<bossPage> {
             ),
           ),
           // Boss 状态格子
-          bossCard(bossName: 'Boss 1',bossImg: 'images/1.webp',),
+          GestureDetector(
+            onTap: () => bossCMD(1),
+            child: bossCard(bossName: 'Boss 1',bossImg: 'images/1.webp',)
+          ),
           bossCard(bossName: 'Boss 2',bossImg: 'images/2.webp',),
           bossCard(bossName: 'Boss 3',bossImg: 'images/3.webp',),
           bossCard(bossName: 'Boss 4',bossImg: 'images/4.webp',),
@@ -180,4 +213,5 @@ class _bossCardState extends State<bossCard> {
 
   }
 }
+
 

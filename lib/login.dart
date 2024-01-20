@@ -18,7 +18,7 @@ class _loginState extends State<login> {
   final username = TextEditingController();
   final password = TextEditingController();
   Future<bool> sendLoginRequest(String username, String password) async {
-    var prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     var uri = prefs.getString('url');
     final url = Uri.parse('${uri!}/login'); // 替换成你的登录接口URL
     final Map<String, String> headers = {'Content-Type': 'application/json'};
@@ -29,7 +29,7 @@ class _loginState extends State<login> {
     };
 
     try {
-      final response = await http.post(
+      var response = await http.post(
         url,
         headers: headers,
         body: jsonEncode(requestBody),
@@ -42,7 +42,26 @@ class _loginState extends State<login> {
         cookie = temp[temp.length-1].split(';')[0];
         await prefs.setString('token', cookie);
         print('Login successful. Cookie: $cookie');
-        return true;
+
+        final Map<String, String> json = {
+          'jwt': cookie,
+        };
+        response = await http.post(
+          Uri.parse('$uri/userinfo'),
+          headers: headers,
+          body: jsonEncode(json)
+        );
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+          prefs.setInt('user_id', jsonResponse['user_id']);
+          prefs.setString('username', jsonResponse['username']);
+          prefs.setInt('user_authority', jsonResponse['user_authority']);
+          return true;
+        }else{
+          return false;
+        }
+
+
       } else {
         // 登录失败，处理错误
         print('Login failed. Status code: ${response.statusCode}');
