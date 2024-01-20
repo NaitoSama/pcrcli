@@ -83,23 +83,23 @@ class _bossPageState extends State<bossPage> {
           return bossCMD(bossID: 1,);
           },
           ),
-              child: bossCard(bossName: 'Boss 1',bossImg: 'images/1.webp',)
+              child: bossCard(bossName: 'Boss 1',bossImg: 'images/1.jpg',)
           ),
           GestureDetector(
               onTap: () => bossCMD(bossID: 2,),
-              child: bossCard(bossName: 'Boss 2',bossImg: 'images/2.webp',)
+              child: bossCard(bossName: 'Boss 2',bossImg: 'images/2.jpg',)
           ),
           GestureDetector(
               onTap: () => bossCMD(bossID: 3,),
-              child: bossCard(bossName: 'Boss 3',bossImg: 'images/3.webp',)
+              child: bossCard(bossName: 'Boss 3',bossImg: 'images/3.jpg',)
           ),
           GestureDetector(
               onTap: () => bossCMD(bossID: 4,),
-              child: bossCard(bossName: 'Boss 4',bossImg: 'images/4.webp',)
+              child: bossCard(bossName: 'Boss 4',bossImg: 'images/4.jpg',)
           ),
           GestureDetector(
               onTap: () => bossCMD(bossID: 5,),
-              child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.webp',)
+              child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.jpg',)
           ),
         ],
       ),
