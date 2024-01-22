@@ -27,18 +27,10 @@ class _bossPageState extends State<bossPage> {
         elevation: 0,
       ),
 
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: ListView(
+        // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // 公告栏
-          // Container(
-          //   color: Colors.blue,
-          //   padding: EdgeInsets.all(16.0),
-          //   child: Text(
-          //     '最新公告: Flutter 主页面示例',
-          //     style: TextStyle(color: Colors.white),
-          //   ),
-          // ),
           Padding(
             padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
             child: Container(
@@ -76,8 +68,10 @@ class _bossPageState extends State<bossPage> {
             ),
           ),
           // Boss 状态格子
+
           GestureDetector(
               onTap: () => showDialog(
+
           context: context,
           builder: (BuildContext context) {
           return bossCMD(bossID: 1,);
