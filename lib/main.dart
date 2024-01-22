@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:pcrcli/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,14 +23,34 @@ void main() async {
   runApp(MyApp(routeNum));
 }
 
+class BossInfo {
+  int bossID = 0;
+  int stage = 0;
+  int round = 0;
+  int valueC = 0;
+  int valueD = 0;
+  List<String> tree = [' ',];
+  String attacking = ' ';
+  BossInfo(this.bossID);
+}
+
 class AppState extends ChangeNotifier {
-  int _myVariable = 0;
-
-  int get myVariable => _myVariable;
-
-  void updateVariable(int newValue) {
-    _myVariable = newValue;
+  BossInfo boss1 = BossInfo(1);
+  BossInfo boss2 = BossInfo(2);
+  BossInfo boss3 = BossInfo(3);
+  BossInfo boss4 = BossInfo(4);
+  BossInfo boss5 = BossInfo(5);
+  bool updateBoss(BossInfo bossInfo,int bossID) {
+    switch (bossID){
+      case 1:boss1 = bossInfo;break;
+      case 2:boss2 = bossInfo;break;
+      case 3:boss3 = bossInfo;break;
+      case 4:boss4 = bossInfo;break;
+      case 5:boss5 = bossInfo;break;
+      default:return false;
+    }
     notifyListeners();
+    return true;
   }
 }
 
