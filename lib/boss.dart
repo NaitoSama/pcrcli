@@ -10,10 +10,29 @@ class bossPage extends StatefulWidget {
 class _bossPageState extends State<bossPage> {
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
-
+  final List<String> records = [];
+  final ScrollController _recordCtl = ScrollController();
 
 
   @override
+  List<Widget> _buildRecords(){
+    return records.map((e) => Center(child: Text(e))).toList();
+  }
+
+  void _addRecord(String value){
+    setState(() {
+      records.add(value);
+    });
+  }
+
+  void _recordToBottom(){
+    _recordCtl.animateTo(
+        _recordCtl.position.maxScrollExtent,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+    );
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -48,22 +67,10 @@ class _bossPageState extends State<bossPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: ListView(
-                padding: EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
+                padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
                 scrollDirection: Axis.vertical,
-                children: [
-                  Text('123321'),
-                  Text('1234567'),
-                  Text('123321'),
-                  Text('1234567'),
-                  Text('123321'),
-                  Text('1234567'),
-                  Text('123321'),
-                  Text('1234567'),
-                  Text('123321'),
-                  Text('1234567'),
-                  Text('123321'),
-                  Text('1234567'),
-                ],
+                controller: _recordCtl,
+                children: _buildRecords(),
               ),
             ),
           ),
@@ -95,6 +102,7 @@ class _bossPageState extends State<bossPage> {
               onTap: () => bossCMD(bossID: 5,),
               child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.jpg',)
           ),
+          ElevatedButton(onPressed: (){_addRecord('test');_recordToBottom();}, child: Text('add test to records'))
         ],
       ),
     );
