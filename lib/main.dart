@@ -1,8 +1,12 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pcrcli/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'boss.dart';
 import 'home.dart';
@@ -35,6 +39,7 @@ class BossInfo {
 }
 
 class AppState extends ChangeNotifier {
+  late WebSocketChannel ws;
   BossInfo boss1 = BossInfo(1);
   BossInfo boss2 = BossInfo(2);
   BossInfo boss3 = BossInfo(3);
