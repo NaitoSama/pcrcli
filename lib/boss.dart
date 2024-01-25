@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,9 @@ class _bossPageState extends State<bossPage> {
   final TextEditingController _revise = TextEditingController();
   final List<String> records = [];
   final ScrollController _recordCtl = ScrollController();
+  late WebSocketChannel ws;
+  late String token;
+  late dynamic appState;
 
 
   @override
@@ -40,9 +44,38 @@ class _bossPageState extends State<bossPage> {
     );
   }
 
+  Future<Map<String,String>> _loadPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String url = prefs.getString('url') ?? '';
+    String token = prefs.getString('token') ?? '';
+    return {'url':url,'token':token};
+  }
+
+  void handleWebsocketMessage(dynamic message) {
+    // todo 处理ws收到的数据，更新appState的boss信息并执行notifyListeners()
+  }
+
+  // ws发送一次获取boss状态的请求 需要已有ws和token
+  void sendInitData(){
+    Map<String,String> jsonData = {
+      'type':'getBoss',
+      'token':token,
+    };
+
+    String jsonString = jsonEncode(jsonData);
+    ws.sink.add(jsonString);
+  }
+
+  @override
+  void dispose() {
+    ws.sink.close();
+    super.dispose();
+  }
+
   @override
 
   Widget build(BuildContext context) {
+    appState = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFF1F4F8),
@@ -55,64 +88,92 @@ class _bossPageState extends State<bossPage> {
         elevation: 0,
       ),
 
-      body: ListView(
-        // crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 公告栏
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
-            child: Container(
-              width: MediaQuery.sizeOf(context).width * 0.8,
-              height: MediaQuery.sizeOf(context).height * 0.2,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 4,
-                    color: Color(0x520E151B),
-                    offset: Offset(0, 2),
-                  )
-                ],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ListView(
-                padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
-                scrollDirection: Axis.vertical,
-                controller: _recordCtl,
-                children: _buildRecords(),
-              ),
-            ),
-          ),
-          // Boss 状态格子
+      body: FutureBuilder(
+        future: _loadPreferences(),
+        builder: (context,snapshot) {
+          if (snapshot.connectionState == ConnectionState.done){
+            token = snapshot.data!['token']!;
+            ws = IOWebSocketChannel.connect(
+              '${snapshot.data?['url']?.replaceFirst('http', 'ws')}/v1/ws',
+              headers: {
+                HttpHeaders.cookieHeader:'pekoToken=${snapshot.data?['token']}'
+              }
+            );
+            ws.stream.listen((event) {
+              handleWebsocketMessage(event);
+            });
+            sendInitData();
 
-          GestureDetector(
-              onTap: () => showDialog(
+          }
 
-          context: context,
-          builder: (BuildContext context) {
-          return bossCMD(bossID: 1,);
-          },
-          ),
-              child: bossCard(bossName: 'Boss 1',bossImg: 'images/1.jpg',)
-          ),
-          GestureDetector(
-              onTap: () => bossCMD(bossID: 2,),
-              child: bossCard(bossName: 'Boss 2',bossImg: 'images/2.jpg',)
-          ),
-          GestureDetector(
-              onTap: () => bossCMD(bossID: 3,),
-              child: bossCard(bossName: 'Boss 3',bossImg: 'images/3.jpg',)
-          ),
-          GestureDetector(
-              onTap: () => bossCMD(bossID: 4,),
-              child: bossCard(bossName: 'Boss 4',bossImg: 'images/4.jpg',)
-          ),
-          GestureDetector(
-              onTap: () => bossCMD(bossID: 5,),
-              child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.jpg',)
-          ),
-          ElevatedButton(onPressed: (){_addRecord('test');_recordToBottom();}, child: Text('add test to records'))
-        ],
+
+
+          return ListView(
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 公告栏
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+                child: Container(
+                  width: MediaQuery.sizeOf(context).width * 0.8,
+                  height: MediaQuery.sizeOf(context).height * 0.2,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 4,
+                        color: Color(0x520E151B),
+                        offset: Offset(0, 2),
+                      )
+                    ],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ListView(
+                    padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
+                    scrollDirection: Axis.vertical,
+                    controller: _recordCtl,
+                    children: _buildRecords(),
+                  ),
+                ),
+              ),
+              // Boss 状态格子
+
+              GestureDetector(
+                  onTap: () => showDialog(
+
+              context: context,
+              builder: (BuildContext context) {
+              return bossCMD(bossID: 1,);
+              },
+              ),
+                  child: bossCard(boss:appState.boss1,bossImg: 'images/1.jpg',)
+              ),
+              // GestureDetector(
+              //     onTap: () => bossCMD(bossID: 2,),
+              //     child: bossCard(bossName: 'Boss 2',bossImg: 'images/2.jpg',)
+              // ),
+              // GestureDetector(
+              //     onTap: () => bossCMD(bossID: 3,),
+              //     child: bossCard(bossName: 'Boss 3',bossImg: 'images/3.jpg',)
+              // ),
+              // GestureDetector(
+              //     onTap: () => bossCMD(bossID: 4,),
+              //     child: bossCard(bossName: 'Boss 4',bossImg: 'images/4.jpg',)
+              // ),
+              // GestureDetector(
+              //     onTap: () => bossCMD(bossID: 5,),
+              //     child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.jpg',)
+              // ),
+              ElevatedButton(onPressed: (){_addRecord('test');_recordToBottom();}, child: Text('add test to records')),
+              ElevatedButton(onPressed: (){
+                var boss1 = appState.boss1;
+                boss1.bossID += 1;
+                appState.updateBoss(boss1,1);
+              }, child: Text('boss test'))
+
+            ],
+          );
+        }
       ),
     );
   }
@@ -144,21 +205,21 @@ class BossStatusTile extends StatelessWidget {
 }
 
 class bossCard extends StatefulWidget {
-  final String bossName;
+  final BossInfo boss;
   final String bossImg;
-  const bossCard({super.key, required this.bossName, required this.bossImg});
+  const bossCard({super.key, required this.boss, required this.bossImg});
 
   @override
   State<bossCard> createState() => _bossCardState();
 }
 
 class _bossCardState extends State<bossCard> {
-  late String bossName;
+  late BossInfo boss;
   late String bossImg;
   @override
   void initState() {
     super.initState();
-    bossName = widget.bossName;
+    boss = widget.boss;
     bossImg = widget.bossImg;
   }
   @override
@@ -211,7 +272,7 @@ class _bossCardState extends State<bossCard> {
                         Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
                           child: Text(
-                            bossName,
+                            '${boss.bossID}',
                           ),
                         ),
                       ],

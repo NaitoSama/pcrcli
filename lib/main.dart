@@ -39,7 +39,6 @@ class BossInfo {
 }
 
 class AppState extends ChangeNotifier {
-  late WebSocketChannel ws;
   BossInfo boss1 = BossInfo(1);
   BossInfo boss2 = BossInfo(2);
   BossInfo boss3 = BossInfo(3);
