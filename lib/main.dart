@@ -47,7 +47,7 @@ class BossInfo {
 }
 
 class AppState extends ChangeNotifier {
-  Map<String,dynamic> records = {};
+  List<String> records = ['1','2'];
   BossInfo boss1 = BossInfo(bossID: 1);
   BossInfo boss2 = BossInfo(bossID: 2);
   BossInfo boss3 = BossInfo(bossID: 3);
@@ -64,6 +64,14 @@ class AppState extends ChangeNotifier {
     }
     notifyListeners();
     return true;
+  }
+  void appendRecord(String data){
+    records.add(data);
+    notifyListeners();
+  }
+  void initRecord(List<String> data){
+    records = data;
+    notifyListeners();
   }
 }
 

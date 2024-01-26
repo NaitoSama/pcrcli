@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pcrcli/main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,30 +19,14 @@ class bossPage extends StatefulWidget {
 class _bossPageState extends State<bossPage> {
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
-  final List<String> records = [];
-  final ScrollController _recordCtl = ScrollController();
+
   late WebSocketChannel ws;
   late String token;
 
 
   @override
-  List<Widget> _buildRecords(){
-    return records.map((e) => Center(child: Text(e))).toList();
-  }
 
-  void _addRecord(String value){
-    setState(() {
-      records.add(value);
-    });
-  }
 
-  void _recordToBottom(){
-    _recordCtl.animateTo(
-        _recordCtl.position.maxScrollExtent,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeOut,
-    );
-  }
 
   Future _loadPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -75,26 +60,34 @@ class _bossPageState extends State<bossPage> {
             round:i['Round'],
             valueC:i['Value'],
             valueD:i['ValueD'],
-            attacking:i['WhoIsIn'] as String,
+            attacking:i['WhoIsIn'],
             tree:(i['Tree'] as String).split('|'),
           );
         Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
         }
+      }else if (data1.containsKey('BeforeBossStage')){
+        List<String> records = [];
+        for(Map<String,dynamic> i in data){
+          records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
+        }
+        Provider.of<AppState>(context, listen: false).initRecord(records);
       }
       
 
     }else if (data is Map){
-      if(data.containsKey('ID')){
+      if(data.containsKey('WhoIsIn')){
         BossInfo boss = BossInfo(
           bossID:data['ID'],
           stage:data['Stage'],
           round:data['Round'],
           valueC:data['Value'],
           valueD:data['ValueD'],
-          attacking:data['WhoIsIn'] as String,
+          attacking:data['WhoIsIn'],
           tree:(data['Tree'] as String).split('|'),
         );
         Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+      }else if (data.containsKey('BeforeBossStage')){
+        Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
       }
     }
   }
@@ -107,6 +100,13 @@ class _bossPageState extends State<bossPage> {
     };
 
     String jsonString = jsonEncode(jsonData);
+    ws.sink.add(jsonString);
+
+    jsonData = {
+      'type':'getRecord',
+      'token':token,
+    };
+    jsonString = jsonEncode(jsonData);
     ws.sink.add(jsonString);
   }
 
@@ -153,30 +153,7 @@ class _bossPageState extends State<bossPage> {
             // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 公告栏
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
-                child: Container(
-                  width: MediaQuery.sizeOf(context).width * 0.8,
-                  height: MediaQuery.sizeOf(context).height * 0.2,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        blurRadius: 4,
-                        color: Color(0x520E151B),
-                        offset: Offset(0, 2),
-                      )
-                    ],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ListView(
-                    padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
-                    scrollDirection: Axis.vertical,
-                    controller: _recordCtl,
-                    children: _buildRecords(),
-                  ),
-                ),
-              ),
+              recordBoard(),
               // Boss 状态格子
 
               GestureDetector(
@@ -188,6 +165,46 @@ class _bossPageState extends State<bossPage> {
               },
               ),
                   child: bossCard(bossID: 1,bossImg: 'images/1.jpg',)
+              ),
+              GestureDetector(
+                  onTap: () => showDialog(
+
+              context: context,
+              builder: (BuildContext context) {
+              return bossCMD(bossID: 2,);
+              },
+              ),
+                  child: bossCard(bossID: 2,bossImg: 'images/2.jpg',)
+              ),
+              GestureDetector(
+                  onTap: () => showDialog(
+
+              context: context,
+              builder: (BuildContext context) {
+              return bossCMD(bossID: 3,);
+              },
+              ),
+                  child: bossCard(bossID: 3,bossImg: 'images/3.jpg',)
+              ),
+              GestureDetector(
+                  onTap: () => showDialog(
+
+              context: context,
+              builder: (BuildContext context) {
+              return bossCMD(bossID: 4,);
+              },
+              ),
+                  child: bossCard(bossID: 4,bossImg: 'images/4.jpg',)
+              ),
+              GestureDetector(
+                  onTap: () => showDialog(
+
+              context: context,
+              builder: (BuildContext context) {
+              return bossCMD(bossID: 5,);
+              },
+              ),
+                  child: bossCard(bossID: 5,bossImg: 'images/5.jpg',)
               ),
               // GestureDetector(
               //     onTap: () => bossCMD(bossID: 2,),
@@ -205,13 +222,18 @@ class _bossPageState extends State<bossPage> {
               //     onTap: () => bossCMD(bossID: 5,),
               //     child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.jpg',)
               // ),
-              ElevatedButton(onPressed: (){_addRecord('test');_recordToBottom();}, child: Text('add test to records')),
+              // ElevatedButton(onPressed: (){_addRecord('test');_recordToBottom();}, child: Text('add test to records')),
               // ElevatedButton(onPressed: (){
               //   var boss1 = appState.boss1;
               //   boss1.bossID += 1;
               //   appState.updateBoss(boss1,1);
               // }, child: Text('boss test'))
-
+              ElevatedButton(
+                  onPressed: (){
+                    Provider.of<AppState>(context, listen: false).appendRecord('test');
+                  },
+                  child: Text('add record board test')
+              )
             ],
           );
         }
@@ -269,11 +291,11 @@ class _bossCardState extends State<bossCard> {
   Widget build(BuildContext context) {
     appState = Provider.of<AppState>(context);
     switch (bossID){
-      case 1: boss = appState.boss1;
-      case 2: boss = appState.boss2;
-      case 3: boss = appState.boss3;
-      case 4: boss = appState.boss4;
-      case 5: boss = appState.boss5;
+      case 1: boss = appState.boss1;break;
+      case 2: boss = appState.boss2;break;
+      case 3: boss = appState.boss3;break;
+      case 4: boss = appState.boss4;break;
+      case 5: boss = appState.boss5;break;
     }
     return // Generated code for this Container Widget...
       Padding(
@@ -316,14 +338,29 @@ class _bossCardState extends State<bossCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LinearProgressIndicator(
-                          value: 0.5,
+                          value: boss.valueC/boss.valueD,
                           backgroundColor: Colors.grey[200],
                           valueColor: AlwaysStoppedAnimation(Colors.blue),
                         ),
                         Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
-                          child: Text(
-                            '${boss.bossID} ${boss.stage} ${boss.round} ${boss.valueC}',
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text('${boss.stage}阶 ${boss.round}回'),
+                                  Text('${NumberFormat('#,##0').format(boss.valueC)}/${NumberFormat('#,##0').format(boss.valueD)}'),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text('攻击:${boss.attacking}'),
+                                  Text('挂树:${boss.tree[0]==' '?0:boss.tree.length}'),
+                                ],
+                              )
+                            ]
                           ),
                         ),
                       ],
@@ -369,5 +406,82 @@ class _bossCMDState extends State<bossCMD> {
     );
   }
 }
+
+
+class recordBoard extends StatefulWidget {
+  const recordBoard({super.key});
+
+  @override
+  State<recordBoard> createState() => _recordBoardState();
+}
+
+class _recordBoardState extends State<recordBoard> {
+  final List<String> records = [];
+  final ScrollController _recordCtl = ScrollController();
+  late dynamic appState;
+
+  // List<Widget> _buildRecords(){
+  //   return appState.records;
+  // }
+
+  // void _addRecord(String value){
+  //   setState(() {
+  //     records.add(value);
+  //   });
+  // }
+
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _recordToBottom();
+    });
+  }
+
+  void _recordToBottom(){
+    _recordCtl.animateTo(
+      _recordCtl.position.maxScrollExtent,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    );
+  }
+  @override
+  Widget build(BuildContext context) {
+    appState = Provider.of<AppState>(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 0.8,
+        height: MediaQuery.sizeOf(context).height * 0.2,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 4,
+              color: Color(0x520E151B),
+              offset: Offset(0, 2),
+            )
+          ],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ListView.builder(
+            padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
+            scrollDirection: Axis.vertical,
+            controller: _recordCtl,
+            itemCount: appState.records.length,
+            itemBuilder: (BuildContext context, int index){
+              return Center(child: Text(appState.records[index]));
+            }
+        ),
+        // child: ListView(
+        //   padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
+        //   scrollDirection: Axis.vertical,
+        //   controller: _recordCtl,
+        //   children: _buildRecords(),
+        // ),
+      ),
+    );
+  }
+}
+
 
 
