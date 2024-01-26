@@ -35,15 +35,24 @@ class BossInfo {
   int valueD = 0;
   List<String> tree = [' ',];
   String attacking = ' ';
-  BossInfo(this.bossID);
+  BossInfo({
+    this.bossID = 0,
+    this.stage = 0,
+    this.round = 0,
+    this.valueC = 0,
+    this.valueD = 0,
+    this.attacking = '',
+    this.tree = const [''],
+  });
 }
 
 class AppState extends ChangeNotifier {
-  BossInfo boss1 = BossInfo(1);
-  BossInfo boss2 = BossInfo(2);
-  BossInfo boss3 = BossInfo(3);
-  BossInfo boss4 = BossInfo(4);
-  BossInfo boss5 = BossInfo(5);
+  Map<String,dynamic> records = {};
+  BossInfo boss1 = BossInfo(bossID: 1);
+  BossInfo boss2 = BossInfo(bossID: 2);
+  BossInfo boss3 = BossInfo(bossID: 3);
+  BossInfo boss4 = BossInfo(bossID: 4);
+  BossInfo boss5 = BossInfo(bossID: 5);
   bool updateBoss(BossInfo bossInfo,int bossID) {
     switch (bossID){
       case 1:boss1 = bossInfo;break;

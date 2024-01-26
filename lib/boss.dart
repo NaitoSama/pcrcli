@@ -22,7 +22,6 @@ class _bossPageState extends State<bossPage> {
   final ScrollController _recordCtl = ScrollController();
   late WebSocketChannel ws;
   late String token;
-  late dynamic appState;
 
 
   @override
@@ -44,15 +43,60 @@ class _bossPageState extends State<bossPage> {
     );
   }
 
-  Future<Map<String,String>> _loadPreferences() async {
+  Future _loadPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String url = prefs.getString('url') ?? '';
-    String token = prefs.getString('token') ?? '';
-    return {'url':url,'token':token};
+    token = prefs.getString('token') ?? '';
+    ws = IOWebSocketChannel.connect(
+        '${url.replaceFirst('http', 'ws')}/v1/ws',
+        headers: {
+          HttpHeaders.cookieHeader:'pekoToken=$token'
+        }
+    );
+    ws.stream.listen((event) {
+      handleWebsocketMessage(event);
+    });
+    sendInitData();
   }
 
   void handleWebsocketMessage(dynamic message) {
     // todo 处理ws收到的数据，更新appState的boss信息并执行notifyListeners()
+    final data = jsonDecode(message);
+    print('message: $message');
+    print('data: $data');
+    if (data is List) {
+      Map<String,dynamic> data1 = data[0];
+      if (data1.containsKey('WhoIsIn')){
+        for(Map<String,dynamic> i in data) {
+          print('i: $i');
+          BossInfo boss = BossInfo(
+            bossID:i['ID'],
+            stage:i['Stage'],
+            round:i['Round'],
+            valueC:i['Value'],
+            valueD:i['ValueD'],
+            attacking:i['WhoIsIn'] as String,
+            tree:(i['Tree'] as String).split('|'),
+          );
+        Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+        }
+      }
+      
+
+    }else if (data is Map){
+      if(data.containsKey('ID')){
+        BossInfo boss = BossInfo(
+          bossID:data['ID'],
+          stage:data['Stage'],
+          round:data['Round'],
+          valueC:data['Value'],
+          valueD:data['ValueD'],
+          attacking:data['WhoIsIn'] as String,
+          tree:(data['Tree'] as String).split('|'),
+        );
+        Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+      }
+    }
   }
 
   // ws发送一次获取boss状态的请求 需要已有ws和token
@@ -75,7 +119,6 @@ class _bossPageState extends State<bossPage> {
   @override
 
   Widget build(BuildContext context) {
-    appState = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFF1F4F8),
@@ -92,18 +135,16 @@ class _bossPageState extends State<bossPage> {
         future: _loadPreferences(),
         builder: (context,snapshot) {
           if (snapshot.connectionState == ConnectionState.done){
-            token = snapshot.data!['token']!;
-            ws = IOWebSocketChannel.connect(
-              '${snapshot.data?['url']?.replaceFirst('http', 'ws')}/v1/ws',
-              headers: {
-                HttpHeaders.cookieHeader:'pekoToken=${snapshot.data?['token']}'
-              }
-            );
-            ws.stream.listen((event) {
-              handleWebsocketMessage(event);
-            });
-            sendInitData();
-
+            if (snapshot.hasError) {
+              // 请求失败，显示错误
+              print("Error: ${snapshot.error}");
+            } else {
+              // 请求成功，显示数据
+              print("ok");
+            }
+          } else {
+            // 请求未结束，显示loading
+            return CircularProgressIndicator();
           }
 
 
@@ -146,7 +187,7 @@ class _bossPageState extends State<bossPage> {
               return bossCMD(bossID: 1,);
               },
               ),
-                  child: bossCard(boss:appState.boss1,bossImg: 'images/1.jpg',)
+                  child: bossCard(bossID: 1,bossImg: 'images/1.jpg',)
               ),
               // GestureDetector(
               //     onTap: () => bossCMD(bossID: 2,),
@@ -165,11 +206,11 @@ class _bossPageState extends State<bossPage> {
               //     child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.jpg',)
               // ),
               ElevatedButton(onPressed: (){_addRecord('test');_recordToBottom();}, child: Text('add test to records')),
-              ElevatedButton(onPressed: (){
-                var boss1 = appState.boss1;
-                boss1.bossID += 1;
-                appState.updateBoss(boss1,1);
-              }, child: Text('boss test'))
+              // ElevatedButton(onPressed: (){
+              //   var boss1 = appState.boss1;
+              //   boss1.bossID += 1;
+              //   appState.updateBoss(boss1,1);
+              // }, child: Text('boss test'))
 
             ],
           );
@@ -205,25 +246,35 @@ class BossStatusTile extends StatelessWidget {
 }
 
 class bossCard extends StatefulWidget {
-  final BossInfo boss;
+  final int bossID;
   final String bossImg;
-  const bossCard({super.key, required this.boss, required this.bossImg});
+  const bossCard({super.key, required this.bossID, required this.bossImg});
 
   @override
   State<bossCard> createState() => _bossCardState();
 }
 
 class _bossCardState extends State<bossCard> {
+  late int bossID;
   late BossInfo boss;
   late String bossImg;
+  late dynamic appState;
   @override
   void initState() {
     super.initState();
-    boss = widget.boss;
+    bossID = widget.bossID;
     bossImg = widget.bossImg;
   }
   @override
   Widget build(BuildContext context) {
+    appState = Provider.of<AppState>(context);
+    switch (bossID){
+      case 1: boss = appState.boss1;
+      case 2: boss = appState.boss2;
+      case 3: boss = appState.boss3;
+      case 4: boss = appState.boss4;
+      case 5: boss = appState.boss5;
+    }
     return // Generated code for this Container Widget...
       Padding(
         padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 8),
@@ -272,7 +323,7 @@ class _bossCardState extends State<bossCard> {
                         Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
                           child: Text(
-                            '${boss.bossID}',
+                            '${boss.bossID} ${boss.stage} ${boss.round} ${boss.valueC}',
                           ),
                         ),
                       ],
