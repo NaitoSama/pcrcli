@@ -161,73 +161,17 @@ class _bossPageState extends State<bossPage> {
 
               context: context,
               builder: (BuildContext context) {
-              return bossCMD(bossID: 1,);
+              return bossCMDDialog(
+                  contentWidget: bossCMD(
+                    bossID: 1,
+                    token: token,
+                    ws: ws,
+                  )
+              );
               },
               ),
                   child: bossCard(bossID: 1,bossImg: 'images/1.jpg',)
               ),
-              GestureDetector(
-                  onTap: () => showDialog(
-
-              context: context,
-              builder: (BuildContext context) {
-              return bossCMD(bossID: 2,);
-              },
-              ),
-                  child: bossCard(bossID: 2,bossImg: 'images/2.jpg',)
-              ),
-              GestureDetector(
-                  onTap: () => showDialog(
-
-              context: context,
-              builder: (BuildContext context) {
-              return bossCMD(bossID: 3,);
-              },
-              ),
-                  child: bossCard(bossID: 3,bossImg: 'images/3.jpg',)
-              ),
-              GestureDetector(
-                  onTap: () => showDialog(
-
-              context: context,
-              builder: (BuildContext context) {
-              return bossCMD(bossID: 4,);
-              },
-              ),
-                  child: bossCard(bossID: 4,bossImg: 'images/4.jpg',)
-              ),
-              GestureDetector(
-                  onTap: () => showDialog(
-
-              context: context,
-              builder: (BuildContext context) {
-              return bossCMD(bossID: 5,);
-              },
-              ),
-                  child: bossCard(bossID: 5,bossImg: 'images/5.jpg',)
-              ),
-              // GestureDetector(
-              //     onTap: () => bossCMD(bossID: 2,),
-              //     child: bossCard(bossName: 'Boss 2',bossImg: 'images/2.jpg',)
-              // ),
-              // GestureDetector(
-              //     onTap: () => bossCMD(bossID: 3,),
-              //     child: bossCard(bossName: 'Boss 3',bossImg: 'images/3.jpg',)
-              // ),
-              // GestureDetector(
-              //     onTap: () => bossCMD(bossID: 4,),
-              //     child: bossCard(bossName: 'Boss 4',bossImg: 'images/4.jpg',)
-              // ),
-              // GestureDetector(
-              //     onTap: () => bossCMD(bossID: 5,),
-              //     child: bossCard(bossName: 'Boss 5',bossImg: 'images/5.jpg',)
-              // ),
-              // ElevatedButton(onPressed: (){_addRecord('test');_recordToBottom();}, child: Text('add test to records')),
-              // ElevatedButton(onPressed: (){
-              //   var boss1 = appState.boss1;
-              //   boss1.bossID += 1;
-              //   appState.updateBoss(boss1,1);
-              // }, child: Text('boss test'))
               ElevatedButton(
                   onPressed: (){
                     Provider.of<AppState>(context, listen: false).appendRecord('test');
@@ -376,34 +320,248 @@ class _bossCardState extends State<bossCard> {
   }
 }
 
+class bossCMDDialog extends AlertDialog {
+  bossCMDDialog({required Widget contentWidget}) : super(
+    content: contentWidget,
+    contentPadding: EdgeInsets.zero,
+    backgroundColor: Colors.transparent,
+    // shape: RoundedRectangleBorder(
+    //   borderRadius: BorderRadius.circular(20),
+    //   side: BorderSide(color: Colors.blue, width: 3),
+    // ),
+  );
+}
+
 class bossCMD extends StatefulWidget {
   final int bossID;
-  const bossCMD({super.key, required this.bossID});
+  final String token;
+  final WebSocketChannel ws;
+  const bossCMD({super.key, required this.bossID, required this.token, required this.ws});
 
   @override
   State<bossCMD> createState() => _bossCMDState();
 }
 
 class _bossCMDState extends State<bossCMD> {
-  late int bossID;
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
   @override
-  void initState() {
-    super.initState();
-    bossID = widget.bossID;
-  }
-  @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: Colors.white,
-      content: Container(
-        constraints: BoxConstraints(
-          maxWidth: 200.0, // 设置最大宽度
+    return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 4,
+              color: Color(0x520E151B),
+              offset: Offset(0, 2),
+            )
+          ],
+          borderRadius: BorderRadius.circular(25),
         ),
-        child: Text('111'),
-      )
-    );
+        // constraints: BoxConstraints(
+        //   maxWidth: 200.0, // 设置最大宽度
+        //   maxHeight: 200,
+        // ),
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(height: 7,),
+              TextField(
+                controller: _damage,
+                obscureText: false,
+                decoration: InputDecoration(
+                  labelText: '伤害值',
+                  hintText: '输入伤害值...',
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color(0xFF59BCF8),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color(0xFF59BCF8),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
+                ),
+              ),
+              Container(height: 7,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){
+                        Map<String,dynamic> jsonData = {
+                          "type":"attack",
+                          "attack_boss":{
+                            "a_type":0,
+                            "boss_id":widget.bossID,
+                            "value":_damage.text,
+                            "from_name":"6"
+                          },
+                          "token":widget.token,
+                        };
+                        String jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                      },
+                      child: Text('出刀',style: TextStyle(color: Colors.black),)),
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){},
+                      child: Text('尾刀',style: TextStyle(color: Colors.black),)),
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){},
+                      child: Text('撤回',style: TextStyle(color: Colors.black),)),
+                ],
+              ),
+              Container(height: 2,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){},
+                      child: Text('我进了',style: TextStyle(color: Colors.black),)),
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){},
+                      child: Text('我出了',style: TextStyle(color: Colors.black),)),
+                ],
+              ),
+              Container(height: 2,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){},
+                      child: Text('挂树',style: TextStyle(color: Colors.black),)),
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){},
+                      child: Text('下树',style: TextStyle(color: Colors.black),)),
+                ],
+              ),
+              Container(height: 10,),
+              TextField(
+                controller: _revise,
+                obscureText: false,
+                decoration: InputDecoration(
+                  labelText: '血量',
+                  hintText: '输入血量...',
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color(0xFF59BCF8),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color(0xFF59BCF8),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
+                ),
+              ),
+              Container(height: 7,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                      style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: (){},
+                      child: Text('调整',style: TextStyle(color: Colors.black),)),
+                ],
+              ),
+            ],
+          ),
+        )
+      );
   }
 }
 
