@@ -19,9 +19,10 @@ class bossPage extends StatefulWidget {
 class _bossPageState extends State<bossPage> {
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
-
+  List<int> recordsUniquenessCheck = [];
   late WebSocketChannel ws;
   late String token;
+  int counter = 0;
 
 
   @override
@@ -39,6 +40,7 @@ class _bossPageState extends State<bossPage> {
         }
     );
     ws.stream.listen((event) {
+      print(event);
       handleWebsocketMessage(event);
     });
     sendInitData();
@@ -47,9 +49,11 @@ class _bossPageState extends State<bossPage> {
   void handleWebsocketMessage(dynamic message) {
     // todo 处理ws收到的数据，更新appState的boss信息并执行notifyListeners()
     final data = jsonDecode(message);
-    print('message: $message');
-    print('data: $data');
     if (data is List) {
+      if (data.length < 1) {
+        print('data is empty');
+        return;
+      }
       Map<String,dynamic> data1 = data[0];
       if (data1.containsKey('WhoIsIn')){
         for(Map<String,dynamic> i in data) {
@@ -68,6 +72,9 @@ class _bossPageState extends State<bossPage> {
       }else if (data1.containsKey('BeforeBossStage')){
         List<String> records = [];
         for(Map<String,dynamic> i in data){
+          if (i['CanUndo'] != 1){
+            continue;
+          }
           records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
         }
         Provider.of<AppState>(context, listen: false).initRecord(records);
@@ -87,6 +94,10 @@ class _bossPageState extends State<bossPage> {
         );
         Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
       }else if (data.containsKey('BeforeBossStage')){
+        if (recordsUniquenessCheck.contains(data['ID'])){
+          return;
+        }
+        recordsUniquenessCheck.add(data['ID']);
         Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
       }
     }
@@ -108,6 +119,12 @@ class _bossPageState extends State<bossPage> {
     };
     jsonString = jsonEncode(jsonData);
     ws.sink.add(jsonString);
+  }
+
+  void _reloadPage(){
+    setState(() {
+      counter = 0;
+    });
   }
 
   @override
@@ -156,7 +173,7 @@ class _bossPageState extends State<bossPage> {
               recordBoard(),
               // Boss 状态格子
 
-              GestureDetector(
+              GestureDetector (
                   onTap: () => showDialog(
 
               context: context,
@@ -171,6 +188,70 @@ class _bossPageState extends State<bossPage> {
               },
               ),
                   child: bossCard(bossID: 1,bossImg: 'images/1.jpg',)
+              ),
+              GestureDetector (
+                  onTap: () => showDialog(
+
+                    context: context,
+                    builder: (BuildContext context) {
+                      return bossCMDDialog(
+                          contentWidget: bossCMD(
+                            bossID: 2,
+                            token: token,
+                            ws: ws,
+                          )
+                      );
+                    },
+                  ),
+                  child: bossCard(bossID: 2,bossImg: 'images/2.jpg',)
+              ),
+              GestureDetector (
+                  onTap: () => showDialog(
+
+                    context: context,
+                    builder: (BuildContext context) {
+                      return bossCMDDialog(
+                          contentWidget: bossCMD(
+                            bossID: 3,
+                            token: token,
+                            ws: ws,
+                          )
+                      );
+                    },
+                  ),
+                  child: bossCard(bossID: 3,bossImg: 'images/3.jpg',)
+              ),
+              GestureDetector (
+                  onTap: () => showDialog(
+
+                    context: context,
+                    builder: (BuildContext context) {
+                      return bossCMDDialog(
+                          contentWidget: bossCMD(
+                            bossID: 4,
+                            token: token,
+                            ws: ws,
+                          )
+                      );
+                    },
+                  ),
+                  child: bossCard(bossID: 4,bossImg: 'images/4.jpg',)
+              ),
+              GestureDetector (
+                  onTap: () => showDialog(
+
+                    context: context,
+                    builder: (BuildContext context) {
+                      return bossCMDDialog(
+                          contentWidget: bossCMD(
+                            bossID: 5,
+                            token: token,
+                            ws: ws,
+                          )
+                      );
+                    },
+                  ),
+                  child: bossCard(bossID: 5,bossImg: 'images/5.jpg',)
               ),
               ElevatedButton(
                   onPressed: (){
@@ -345,6 +426,20 @@ class bossCMD extends StatefulWidget {
 class _bossCMDState extends State<bossCMD> {
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
+  late int authority;
+  int round = 1;
+  @override
+  void initState() {
+    super.initState();
+    _loadStoredValue();
+  }
+
+  Future<void> _loadStoredValue() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      authority = prefs.getInt('user_authority') ?? 0;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -371,6 +466,7 @@ class _bossCMDState extends State<bossCMD> {
             children: [
               Container(height: 7,),
               TextField(
+                keyboardType: TextInputType.number,
                 controller: _damage,
                 obscureText: false,
                 decoration: InputDecoration(
@@ -392,6 +488,21 @@ class _bossCMDState extends State<bossCMD> {
                   ),
                   contentPadding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
                 ),
+                onEditingComplete: (){
+                  Map<String,dynamic> jsonData = {
+                    "type":"attack",
+                    "attack_boss":{
+                      "a_type":0,
+                      "boss_id":widget.bossID,
+                      "value":int.parse(_damage.text),
+                      "from_name":"6"
+                    },
+                    "token":widget.token,
+                  };
+                  String jsonString = json.encode(jsonData);
+                  widget.ws.sink.add(jsonString);
+                  Navigator.of(context).pop();
+                },
               ),
               Container(height: 7,),
               Row(
@@ -414,13 +525,14 @@ class _bossCMDState extends State<bossCMD> {
                           "attack_boss":{
                             "a_type":0,
                             "boss_id":widget.bossID,
-                            "value":_damage.text,
+                            "value":int.parse(_damage.text),
                             "from_name":"6"
                           },
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
                         widget.ws.sink.add(jsonString);
+                        Navigator.of(context).pop();
                       },
                       child: Text('出刀',style: TextStyle(color: Colors.black),)),
                   TextButton(
@@ -434,7 +546,21 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                       ),
-                      onPressed: (){},
+                      onPressed: (){
+                        Map<String,dynamic> jsonData = {
+                          "type":"attack",
+                          "attack_boss":{
+                            "a_type":1,
+                            "boss_id":widget.bossID,
+                            "value":2036854775807,
+                            "from_name":"6"
+                          },
+                          "token":widget.token,
+                        };
+                        String jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                        Navigator.of(context).pop();
+                      },
                       child: Text('尾刀',style: TextStyle(color: Colors.black),)),
                   TextButton(
                       style: ButtonStyle(
@@ -447,7 +573,25 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                       ),
-                      onPressed: (){},
+                      onPressed: (){
+                        Map<String,dynamic> jsonData = {
+                          "type":"undo",
+                          "undo":{
+                            "boss_id":widget.bossID,
+                            "from_name":"6"
+                          },
+                          "token":widget.token,
+                        };
+                        String jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                        jsonData = {
+                          "type":"getRecord",
+                          "token":widget.token,
+                        };
+                        jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                        Navigator.of(context).pop();
+                      },
                       child: Text('撤回',style: TextStyle(color: Colors.black),)),
                 ],
               ),
@@ -466,7 +610,19 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                       ),
-                      onPressed: (){},
+                      onPressed: (){
+                        Map<String,dynamic> jsonData = {
+                          "type":"imin",
+                          "im_in":{
+                            "boss_id":widget.bossID,
+                            "from_name":"6"
+                          },
+                          "token":widget.token,
+                        };
+                        String jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                        Navigator.of(context).pop();
+                      },
                       child: Text('我进了',style: TextStyle(color: Colors.black),)),
                   TextButton(
                       style: ButtonStyle(
@@ -479,7 +635,19 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                       ),
-                      onPressed: (){},
+                      onPressed: (){
+                        Map<String,dynamic> jsonData = {
+                          "type":"imout",
+                          "im_out":{
+                            "boss_id":widget.bossID,
+                            "from_name":"6"
+                          },
+                          "token":widget.token,
+                        };
+                        String jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                        Navigator.of(context).pop();
+                      },
                       child: Text('我出了',style: TextStyle(color: Colors.black),)),
                 ],
               ),
@@ -498,7 +666,19 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                       ),
-                      onPressed: (){},
+                      onPressed: (){
+                        Map<String,dynamic> jsonData = {
+                          "type":"ontree",
+                          "on_tree":{
+                            "boss_id":widget.bossID,
+                            "from_name":"6"
+                          },
+                          "token":widget.token,
+                        };
+                        String jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                        Navigator.of(context).pop();
+                      },
                       child: Text('挂树',style: TextStyle(color: Colors.black),)),
                   TextButton(
                       style: ButtonStyle(
@@ -511,52 +691,102 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                       ),
-                      onPressed: (){},
+                      onPressed: (){
+                        Map<String,dynamic> jsonData = {
+                          "type":"downtree",
+                          "down_tree":{
+                            "boss_id":widget.bossID,
+                            "from_name":"6"
+                          },
+                          "token":widget.token,
+                        };
+                        String jsonString = json.encode(jsonData);
+                        widget.ws.sink.add(jsonString);
+                        Navigator.of(context).pop();
+                      },
                       child: Text('下树',style: TextStyle(color: Colors.black),)),
                 ],
               ),
               Container(height: 10,),
-              TextField(
-                controller: _revise,
-                obscureText: false,
-                decoration: InputDecoration(
-                  labelText: '血量',
-                  hintText: '输入血量...',
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Color(0xFF59BCF8),
-                      width: 1,
+              Visibility(
+                visible: (authority>1),
+                child: TextField(
+                  controller: _revise,
+                  obscureText: false,
+                  decoration: InputDecoration(
+                    labelText: '血量',
+                    hintText: '输入血量...',
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0xFF59BCF8),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Color(0xFF59BCF8),
-                      width: 1,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0xFF59BCF8),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    borderRadius: BorderRadius.circular(10),
+                    contentPadding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
                   ),
-                  contentPadding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
                 ),
               ),
-              Container(height: 7,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                      style: ButtonStyle(
-                        side: MaterialStateProperty.all<BorderSide>(
-                          const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
-                        ),
-                        shape: MaterialStateProperty.all<OutlinedBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+              Visibility(visible: (authority>1),child: Container(height: 7,)),
+              Visibility(
+                visible: (authority>1),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    DropdownButton<int>(
+
+                      value: round,
+                      onChanged: (int? newValue) {
+                        setState(() {
+                          round = newValue ?? 1;
+                        });
+                      },
+                      items: List.generate(100, (index) => index + 1)
+                          .map<DropdownMenuItem<int>>((int value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text(value.toString()),
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(height: 20),
+                    Text('Selected round: $round'),
+
+                    TextButton(
+                        style: ButtonStyle(
+                          side: MaterialStateProperty.all<BorderSide>(
+                            const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                          ),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
                           ),
                         ),
-                      ),
-                      onPressed: (){},
-                      child: Text('调整',style: TextStyle(color: Colors.black),)),
-                ],
+                        onPressed: (){
+                          Map<String,dynamic> jsonData = {
+                            "type":"revise",
+                            "revise_boss":{
+                              "boss_id":widget.bossID,
+                              "value":int.parse(_revise.text),
+                              "round":round
+                            },
+                            "token":widget.token,
+                          };
+                          String jsonString = json.encode(jsonData);
+                          widget.ws.sink.add(jsonString);
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('调整',style: TextStyle(color: Colors.black),)),
+                  ],
+                ),
               ),
             ],
           ),
