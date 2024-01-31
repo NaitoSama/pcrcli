@@ -47,7 +47,7 @@ class BossInfo {
 }
 
 class AppState extends ChangeNotifier {
-  List<String> records = ['1','2'];
+  List<String> records = [];
   BossInfo boss1 = BossInfo(bossID: 1);
   BossInfo boss2 = BossInfo(bossID: 2);
   BossInfo boss3 = BossInfo(bossID: 3);
