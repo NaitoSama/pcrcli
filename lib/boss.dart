@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pcrcli/main.dart';
@@ -8,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:http/http.dart' as http;
 
 class bossPage extends StatefulWidget {
   const bossPage({super.key});
@@ -22,6 +24,7 @@ class _bossPageState extends State<bossPage> {
   List<int> recordsUniquenessCheck = [];
   late WebSocketChannel ws;
   late String token;
+  late String url;
   int counter = 0;
 
 
@@ -31,7 +34,7 @@ class _bossPageState extends State<bossPage> {
 
   Future _loadPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String url = prefs.getString('url') ?? '';
+    url = prefs.getString('url') ?? '';
     token = prefs.getString('token') ?? '';
     ws = IOWebSocketChannel.connect(
         '${url.replaceFirst('http', 'ws')}/v1/ws',
@@ -187,7 +190,7 @@ class _bossPageState extends State<bossPage> {
               );
               },
               ),
-                  child: bossCard(bossID: 1,bossImg: 'images/1.jpg',)
+                  child: bossCard(bossID: 1,bossImg: '$url/pic/1.jpg',url: url,)
               ),
               GestureDetector (
                   onTap: () => showDialog(
@@ -203,7 +206,7 @@ class _bossPageState extends State<bossPage> {
                       );
                     },
                   ),
-                  child: bossCard(bossID: 2,bossImg: 'images/2.jpg',)
+                  child: bossCard(bossID: 2,bossImg: '$url/pic/2.jpg',url: url,)
               ),
               GestureDetector (
                   onTap: () => showDialog(
@@ -219,7 +222,7 @@ class _bossPageState extends State<bossPage> {
                       );
                     },
                   ),
-                  child: bossCard(bossID: 3,bossImg: 'images/3.jpg',)
+                  child: bossCard(bossID: 3,bossImg: '$url/pic/3.jpg',url: url,)
               ),
               GestureDetector (
                   onTap: () => showDialog(
@@ -235,7 +238,7 @@ class _bossPageState extends State<bossPage> {
                       );
                     },
                   ),
-                  child: bossCard(bossID: 4,bossImg: 'images/4.jpg',)
+                  child: bossCard(bossID: 4,bossImg: '$url/pic/4.jpg',url: url,)
               ),
               GestureDetector (
                   onTap: () => showDialog(
@@ -251,7 +254,7 @@ class _bossPageState extends State<bossPage> {
                       );
                     },
                   ),
-                  child: bossCard(bossID: 5,bossImg: 'images/5.jpg',)
+                  child: bossCard(bossID: 5,bossImg: '$url/pic/5.jpg',url: url,)
               ),
               ElevatedButton(
                   onPressed: (){
@@ -295,7 +298,8 @@ class BossStatusTile extends StatelessWidget {
 class bossCard extends StatefulWidget {
   final int bossID;
   final String bossImg;
-  const bossCard({super.key, required this.bossID, required this.bossImg});
+  final String url;
+  const bossCard({super.key, required this.bossID, required this.bossImg, required this.url});
 
   @override
   State<bossCard> createState() => _bossCardState();
@@ -306,11 +310,68 @@ class _bossCardState extends State<bossCard> {
   late BossInfo boss;
   late String bossImg;
   late dynamic appState;
+  late String url;
+
+  // 选择图片
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // 裁剪图片
+      File? croppedImage = await _cropImage(File(pickedFile.path));
+
+      if (croppedImage != null) {
+
+        // 上传图片
+        await _uploadImage(croppedImage);
+
+        // 刷新页面
+        setState(() {});
+      }
+    }
+  }
+
+  // 裁剪图片
+  Future<File?> _cropImage(File image) async {
+    return await ImageCropper().cropImage(
+      sourcePath: image.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        // CropAspectRatioPreset.original,
+      ],
+      androidUiSettings: AndroidUiSettings(
+        toolbarTitle: 'Crop Image',
+        toolbarColor: Colors.deepOrange,
+        toolbarWidgetColor: Colors.white,
+        initAspectRatio: CropAspectRatioPreset.original,
+        lockAspectRatio: false,
+      ),
+    );
+  }
+
+  // 上传图片
+  Future<void> _uploadImage(File image) async {
+    final uri = Uri.parse(url);
+    var request = http.MultipartRequest('POST', uri);
+
+    request.files.add(await http.MultipartFile.fromPath('pic', image.path));
+
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      // 上传成功
+      print('Image uploaded successfully!');
+    } else {
+      // 上传失败
+      print('Image upload failed with status code: ${response.statusCode}');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     bossID = widget.bossID;
     bossImg = widget.bossImg;
+    url = widget.url;
   }
   @override
   Widget build(BuildContext context) {
@@ -347,7 +408,7 @@ class _bossCardState extends State<bossCard> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.asset(
+                  child: Image.network(
                     bossImg,
                     width: 80,
                     height: 80,
@@ -756,8 +817,8 @@ class _bossCMDState extends State<bossCMD> {
                         );
                       }).toList(),
                     ),
-                    SizedBox(height: 20),
-                    Text('Selected round: $round'),
+                    // SizedBox(height: 20),
+                    // Text('Selected round: $round'),
 
                     TextButton(
                         style: ButtonStyle(
@@ -785,6 +846,32 @@ class _bossCMDState extends State<bossCMD> {
                           Navigator.of(context).pop();
                         },
                         child: Text('调整',style: TextStyle(color: Colors.black),)),
+                    TextButton(
+                        style: ButtonStyle(
+                          side: MaterialStateProperty.all<BorderSide>(
+                            const BorderSide(color: Color(0xFF59BCF8), width: 1.2),
+                          ),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                        ),
+                        onPressed: (){
+                          Map<String,dynamic> jsonData = {
+                            "type":"revise",
+                            "revise_boss":{
+                              "boss_id":widget.bossID,
+                              "value":int.parse(_revise.text),
+                              "round":round
+                            },
+                            "token":widget.token,
+                          };
+                          String jsonString = json.encode(jsonData);
+                          widget.ws.sink.add(jsonString);
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('上传图片',style: TextStyle(color: Colors.black),)),
                   ],
                 ),
               ),
