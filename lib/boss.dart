@@ -46,7 +46,44 @@ class _bossPageState extends State<bossPage> {
       print(event);
       handleWebsocketMessage(event);
     });
-    sendInitData();
+    // sendInitData();
+    await getRecords(url,token);
+  }
+
+  Future<void> getRecords(String url,String token) async {
+    var headers = {'Cookie':'pekoToken=$token'};
+    var request = http.Request('GET',Uri.parse('$url/v1/records'));
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    var jsonString = await response.stream.bytesToString();
+    var data = jsonDecode(jsonString);
+    List<String> records = [];
+    for(Map<String,dynamic> i in data){
+      if (i['CanUndo'] != 1){
+        continue;
+      }
+      records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
+    }
+    Provider.of<AppState>(context, listen: false).initRecord(records);
+
+    request = http.Request('GET',Uri.parse('$url/v1/bosses'));
+    request.headers.addAll(headers);
+    response = await request.send();
+    jsonString = await response.stream.bytesToString();
+    data = jsonDecode(jsonString);
+    for(Map<String,dynamic> i in data) {
+      print('i: $i');
+      BossInfo boss = BossInfo(
+        bossID:i['ID'],
+        stage:i['Stage'],
+        round:i['Round'],
+        valueC:i['Value'],
+        valueD:i['ValueD'],
+        attacking:i['WhoIsIn'],
+        tree:(i['Tree'] as String).split('|'),
+      );
+      Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+    }
   }
 
   void handleWebsocketMessage(dynamic message) {
@@ -70,7 +107,7 @@ class _bossPageState extends State<bossPage> {
             attacking:i['WhoIsIn'],
             tree:(i['Tree'] as String).split('|'),
           );
-        Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+          Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
         }
       }else if (data1.containsKey('BeforeBossStage')){
         List<String> records = [];
