@@ -17,10 +17,14 @@ void main() async {
   int routeNum = 0;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? url = prefs.getString('url');
-  if (!(url == null || url == '')){
+  // url = '';
+  if (url == null || url == ''){
+    routeNum = 0;
+  }else{
     routeNum = 1;
   }
   String? token = prefs.getString('token');
+  // token = '';
   if (!(token == null || token == '')){
     routeNum = 2;
   }
