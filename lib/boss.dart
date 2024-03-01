@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +52,7 @@ class _bossPageState extends State<bossPage> {
   }
 
   Future<void> getRecords(String url,String token) async {
+    var homeData = Get.find<HomeData>();
     var headers = {'Cookie':'pekoToken=$token'};
     var request = http.Request('GET',Uri.parse('$url/v1/records'));
     request.headers.addAll(headers);
@@ -62,9 +64,11 @@ class _bossPageState extends State<bossPage> {
       if (i['CanUndo'] != 1){
         continue;
       }
+      print('i: $i');
       records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
     }
-    Provider.of<AppState>(context, listen: false).initRecord(records);
+    // Provider.of<AppState>(context, listen: false).initRecord(records);
+    homeData.initRecord(records);
 
     request = http.Request('GET',Uri.parse('$url/v1/bosses'));
     request.headers.addAll(headers);
@@ -82,44 +86,46 @@ class _bossPageState extends State<bossPage> {
         attacking:i['WhoIsIn'],
         tree:(i['Tree'] as String).split('|'),
       );
-      Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+      // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+      homeData.updateBoss(boss, boss.bossID);
     }
   }
 
   void handleWebsocketMessage(dynamic message) {
+    var homeData = Get.find<HomeData>();
     // todo 处理ws收到的数据，更新appState的boss信息并执行notifyListeners()
     final data = jsonDecode(message);
     if (data is List) {
-      if (data.length < 1) {
-        print('data is empty');
-        return;
-      }
-      Map<String,dynamic> data1 = data[0];
-      if (data1.containsKey('WhoIsIn')){
-        for(Map<String,dynamic> i in data) {
-          print('i: $i');
-          BossInfo boss = BossInfo(
-            bossID:i['ID'],
-            stage:i['Stage'],
-            round:i['Round'],
-            valueC:i['Value'],
-            valueD:i['ValueD'],
-            attacking:i['WhoIsIn'],
-            tree:(i['Tree'] as String).split('|'),
-          );
-          Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
-        }
-      }else if (data1.containsKey('BeforeBossStage')){
-        List<String> records = [];
-        for(Map<String,dynamic> i in data){
-          if (i['CanUndo'] != 1){
-            continue;
-          }
-          records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
-        }
-        Provider.of<AppState>(context, listen: false).initRecord(records);
-      }
-      
+      // if (data.length < 1) {
+      //   print('data is empty');
+      //   return;
+      // }
+      // Map<String,dynamic> data1 = data[0];
+      // if (data1.containsKey('WhoIsIn')){
+      //   for(Map<String,dynamic> i in data) {
+      //     print('i: $i');
+      //     BossInfo boss = BossInfo(
+      //       bossID:i['ID'],
+      //       stage:i['Stage'],
+      //       round:i['Round'],
+      //       valueC:i['Value'],
+      //       valueD:i['ValueD'],
+      //       attacking:i['WhoIsIn'],
+      //       tree:(i['Tree'] as String).split('|'),
+      //     );
+      //     Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+      //   }
+      // }else if (data1.containsKey('BeforeBossStage')){
+      //   List<String> records = [];
+      //   for(Map<String,dynamic> i in data){
+      //     if (i['CanUndo'] != 1){
+      //       continue;
+      //     }
+      //     records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
+      //   }
+      //   Provider.of<AppState>(context, listen: false).initRecord(records);
+      // }
+      //
 
     }else if (data is Map){
       if(data.containsKey('WhoIsIn')){
@@ -132,13 +138,15 @@ class _bossPageState extends State<bossPage> {
           attacking:data['WhoIsIn'],
           tree:(data['Tree'] as String).split('|'),
         );
-        Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+        // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+        homeData.updateBoss(boss,boss.bossID);
       }else if (data.containsKey('BeforeBossStage')){
         if (recordsUniquenessCheck.contains(data['ID'])){
           return;
         }
         recordsUniquenessCheck.add(data['ID']);
-        Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
+        // Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
+        homeData.appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
       }
     }
   }
@@ -295,7 +303,9 @@ class _bossPageState extends State<bossPage> {
               ),
               ElevatedButton(
                   onPressed: (){
-                    Provider.of<AppState>(context, listen: false).appendRecord('test');
+                    // Provider.of<AppState>(context, listen: false).appendRecord('test');
+                    var homeData = Get.find<HomeData>();
+                    homeData.appendRecord('test');
                   },
                   child: Text('add record board test')
               )
@@ -348,6 +358,7 @@ class _bossCardState extends State<bossCard> {
   late String bossImg;
   late dynamic appState;
   late String url;
+  var homeData = Get.find<HomeData>();
 
   // 选择图片
   Future<void> _pickImage() async {
@@ -412,14 +423,14 @@ class _bossCardState extends State<bossCard> {
   }
   @override
   Widget build(BuildContext context) {
-    appState = Provider.of<AppState>(context);
-    switch (bossID){
-      case 1: boss = appState.boss1;break;
-      case 2: boss = appState.boss2;break;
-      case 3: boss = appState.boss3;break;
-      case 4: boss = appState.boss4;break;
-      case 5: boss = appState.boss5;break;
-    }
+    // appState = Provider.of<AppState>(context);
+    // switch (bossID){
+    //   case 1: boss = appState.boss1;break;
+    //   case 2: boss = appState.boss2;break;
+    //   case 3: boss = appState.boss3;break;
+    //   case 4: boss = appState.boss4;break;
+    //   case 5: boss = appState.boss5;break;
+    // }
     return // Generated code for this Container Widget...
       Padding(
         padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 8),
@@ -455,38 +466,49 @@ class _bossCardState extends State<bossCard> {
                 Expanded(
                   child: Padding(
                     padding: EdgeInsetsDirectional.fromSTEB(12, 0, 0, 0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        LinearProgressIndicator(
-                          value: boss.valueC/boss.valueD,
-                          backgroundColor: Colors.grey[200],
-                          valueColor: AlwaysStoppedAnimation(Colors.blue),
-                        ),
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text('${boss.stage}阶 ${boss.round}回'),
-                                  Text('${NumberFormat('#,##0').format(boss.valueC)}/${NumberFormat('#,##0').format(boss.valueD)}'),
-                                ],
+                    child: Obx(
+                      (){
+                        switch (bossID){
+                          case 1: boss = homeData.boss1.value;break;
+                          case 2: boss = homeData.boss2.value;break;
+                          case 3: boss = homeData.boss3.value;break;
+                          case 4: boss = homeData.boss4.value;break;
+                          case 5: boss = homeData.boss5.value;break;
+                        }
+                        return Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            LinearProgressIndicator(
+                              value: boss.valueC/boss.valueD,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: AlwaysStoppedAnimation(Colors.blue),
+                            ),
+                            Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
+                              child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text('${boss.stage}阶 ${boss.round}回'),
+                                        Text('${NumberFormat('#,##0').format(boss.valueC)}/${NumberFormat('#,##0').format(boss.valueD)}'),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text('攻击:${boss.attacking}'),
+                                        Text('挂树:${boss.tree[0]==' '?0:boss.tree.length}'),
+                                      ],
+                                    )
+                                  ]
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text('攻击:${boss.attacking}'),
-                                  Text('挂树:${boss.tree[0]==' '?0:boss.tree.length}'),
-                                ],
-                              )
-                            ]
-                          ),
-                        ),
-                      ],
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -931,6 +953,7 @@ class _recordBoardState extends State<recordBoard> {
   final List<String> records = [];
   final ScrollController _recordCtl = ScrollController();
   late dynamic appState;
+  var homeData = Get.find<HomeData>();
 
   // List<Widget> _buildRecords(){
   //   return appState.records;
@@ -958,7 +981,7 @@ class _recordBoardState extends State<recordBoard> {
   }
   @override
   Widget build(BuildContext context) {
-    appState = Provider.of<AppState>(context);
+    // appState = Provider.of<AppState>(context);
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
       child: Container(
@@ -975,14 +998,31 @@ class _recordBoardState extends State<recordBoard> {
           ],
           borderRadius: BorderRadius.circular(8),
         ),
-        child: ListView.builder(
-            padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
-            scrollDirection: Axis.vertical,
-            controller: _recordCtl,
-            itemCount: appState.records.length,
-            itemBuilder: (BuildContext context, int index){
-              return Center(child: Text(appState.records[index]));
-            }
+        child: Obx(
+          (){
+            homeData.records.listen((List<String> newList) {
+              // 在这里执行当列表发生变化时要执行的操作
+              // 例如将 ListView 拉到最下面的位置
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _recordCtl.animateTo(
+                  _recordCtl.position.maxScrollExtent,
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.easeOut,
+                );
+              });
+            });
+            return ListView.builder(
+              padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),
+              scrollDirection: Axis.vertical,
+              controller: _recordCtl,
+              // itemCount: appState.records.length,
+              itemCount: homeData.records.length,
+              itemBuilder: (BuildContext context, int index){
+                // return Center(child: Text(appState.records[index]));
+                return Center(child: Text(homeData.records[index]));
+              }
+            );
+          }
         ),
         // child: ListView(
         //   padding: EdgeInsetsDirectional.fromSTEB(10, 30, 10, 30),

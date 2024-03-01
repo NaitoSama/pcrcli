@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pcrcli/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
@@ -14,21 +15,57 @@ import 'login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  var routeNum = await initState();
+  runApp(MyApp(routeNum));
+}
+
+Future<int> initState() async {
+  Get.put(HomeData());
+
+
   int routeNum = 0;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? url = prefs.getString('url');
-  // url = '';
+  url = '';
   if (url == null || url == ''){
     routeNum = 0;
   }else{
     routeNum = 1;
   }
   String? token = prefs.getString('token');
-  // token = '';
+  token = '';
   if (!(token == null || token == '')){
     routeNum = 2;
   }
-  runApp(MyApp(routeNum));
+  return routeNum;
+}
+
+class HomeData extends GetxController {
+  var records = <String>[].obs;
+  var boss1 = BossInfo(bossID: 1).obs;
+  var boss2 = BossInfo(bossID: 2).obs;
+  var boss3 = BossInfo(bossID: 3).obs;
+  var boss4 = BossInfo(bossID: 4).obs;
+  var boss5 = BossInfo(bossID: 5).obs;
+
+  bool updateBoss(BossInfo bossInfo,int bossID) {
+    switch (bossID){
+      case 1:boss1.value = bossInfo;break;
+      case 2:boss2.value = bossInfo;break;
+      case 3:boss3.value = bossInfo;break;
+      case 4:boss4.value = bossInfo;break;
+      case 5:boss5.value = bossInfo;break;
+      default:return false;
+    }
+    return true;
+  }
+
+  void appendRecord(String data){
+    records.add(data);
+  }
+  void initRecord(List<String> data){
+    records=RxList<String>.from(data);
+  }
 }
 
 class BossInfo {
