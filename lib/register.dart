@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:hive/hive.dart';
 import 'package:pcrcli/register.dart';
 import 'package:http/http.dart' as http;
@@ -23,9 +25,10 @@ class _registerState extends State<register> {
   final code = TextEditingController();
 
   Future<bool> sendRegisterRequest(String username, String password, String code) async {
-    final prefs = await SharedPreferences.getInstance();
-    var uri = prefs.getString('url');
-    final url = Uri.parse('${uri!}/register'); // 替换成你的登录接口URL
+    // final prefs = await SharedPreferences.getInstance();
+    // var uri = prefs.getString('url');
+    GetxSettings getxSettings = Get.find<GetxSettings>();
+    final url = Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/login'); // 替换成你的登录接口URL
     final Map<String, String> headers = {'Content-Type': 'application/json'};
 
     final Map<String, dynamic> requestBody = {
@@ -46,27 +49,34 @@ class _registerState extends State<register> {
         String cookie = response.headers['set-cookie'] ?? '';
         var temp = cookie.split('pekoToken=');
         cookie = temp[temp.length-1].split(';')[0];
-        await prefs.setString('token', cookie);
+        // await prefs.setString('token', cookie);
+        GetxSettings getxSettings = Get.find<GetxSettings>();
+        getxSettings.appSettings.value.token = cookie;
+        getxSettings.updateSettings(getxSettings.appSettings.value);
         print('Login successful. Cookie: $cookie');
 
         final Map<String, String> json = {
           'jwt': cookie,
         };
         response = await http.post(
-            Uri.parse('$uri/userinfo'),
+            Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/userinfo'),
             headers: headers,
             body: jsonEncode(json)
         );
         if (response.statusCode == 200) {
           final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-          prefs.setInt('user_id', jsonResponse['user_id']);
-          prefs.setString('username', jsonResponse['username']);
-          prefs.setInt('user_authority', jsonResponse['user_authority']);
-          var box = await Hive.openBox('settingsBox');
-          AppSettings appSettings = box.get('settings');
-          appSettings.username = jsonResponse['username'];
-          appSettings.authority = jsonResponse['user_authority'];
-          box.put('settings', appSettings);
+          // prefs.setInt('user_id', jsonResponse['user_id']);
+          // prefs.setString('username', jsonResponse['username']);
+          // prefs.setInt('user_authority', jsonResponse['user_authority']);
+          // var box = await Hive.openBox('settingsBox');
+          // AppSettings appSettings = box.get('settings');
+          // appSettings.username = jsonResponse['username'];
+          // appSettings.authority = jsonResponse['user_authority'];
+          // box.put('settings', appSettings);
+          GetxSettings getxSettings = Get.find<GetxSettings>();
+          getxSettings.appSettings.value.username = jsonResponse['username'];
+          getxSettings.appSettings.value.authority = jsonResponse['user_authority'];
+          getxSettings.updateSettings(getxSettings.appSettings.value);
           return true;
         }else{
           return false;

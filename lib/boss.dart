@@ -29,7 +29,8 @@ class _bossPageState extends State<bossPage> {
   late String token;
   late String url;
   // late Box<dynamic> settingsBox;
-  late AppSettings appSettings;
+  // late AppSettings appSettings;
+  late GetxSettings getxSettings;
   int counter = 0;
 
 
@@ -39,12 +40,12 @@ class _bossPageState extends State<bossPage> {
 
   Future _loadPreferences() async {
     // SharedPreferences prefs = await SharedPreferences.getInstance();
-    var settingsBox = await Hive.openBox('settingsBox');
-    appSettings = settingsBox.get('settings');
+    // var settingsBox = await Hive.openBox('settingsBox');
+    getxSettings = Get.find<GetxSettings>();
     // url = prefs.getString('url') ?? '';
-    url = appSettings.remoteServerUrl;
+    url = getxSettings.appSettings.value.remoteServerUrl;
     // token = prefs.getString('token') ?? '';
-    token = appSettings.token;
+    token = getxSettings.appSettings.value.token;
     ws = IOWebSocketChannel.connect(
         '${url.replaceFirst('http', 'ws')}/v1/ws',
         headers: {
@@ -317,7 +318,7 @@ class _bossPageState extends State<bossPage> {
                   },
                   child: Text('add record board test')
               ),
-              Text('${appSettings.remoteServerUrl},${appSettings.username}${appSettings.authority},${appSettings.token}'),
+              Text('${getxSettings.appSettings.value.remoteServerUrl},${getxSettings.appSettings.value.username}${getxSettings.appSettings.value.authority},${getxSettings.appSettings.value.token}'),
             ],
           );
         }

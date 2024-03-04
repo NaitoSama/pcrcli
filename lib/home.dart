@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:pcrcli/settings.dart';
@@ -42,15 +43,13 @@ class _StartUpState extends State<StartUp> {
   Future<void> setUrl(String ip,String port) async {
     String url = 'http://$ip:$port';
     // Load and obtain the shared preferences for this app.
-    final prefs = await SharedPreferences.getInstance();
+    // final prefs = await SharedPreferences.getInstance();
 
     // Save the counter value to persistent storage under the 'counter' key.
-    await prefs.setString('url', url);
-    var box = await Hive.openBox('settingsBox');
-    AppSettings appSettings = box.get('settings');
-    appSettings.remoteServerUrl = url;
-    appSettings.isUrlConfirmed = true;
-    box.put('settings', appSettings);
+    // await prefs.setString('url', url);
+    GetxSettings getxSettings = Get.find<GetxSettings>();
+    getxSettings.appSettings.value.remoteServerUrl = url;
+    getxSettings.updateSettings(getxSettings.appSettings.value);
   }
   Future<void> wrongAddDialog() {
     return showDialog<bool>(

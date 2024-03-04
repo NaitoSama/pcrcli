@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 
 part 'settings.g.dart';
@@ -33,5 +34,14 @@ class AppSettings {
       case 7:getIndex['token'] = 7;break;
       }
     }
+  }
+}
+
+class GetxSettings extends GetxController {
+  var appSettings = AppSettings().obs;
+  Future<void> updateSettings(AppSettings newSettings) async {
+    var settingsBox = await Hive.openBox('settingsBox');
+    settingsBox.put('settings', newSettings);
+    // appSettings.value  = newSettings;
   }
 }

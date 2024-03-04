@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:hive/hive.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/register.dart';
@@ -22,17 +24,18 @@ class _loginState extends State<login> {
   final username = TextEditingController();
   final password = TextEditingController();
   Future<bool> sendLoginRequest(String username, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    var uri = prefs.getString('url');
-    final url = Uri.parse('${uri!}/login'); // 替换成你的登录接口URL
+    // final prefs = await SharedPreferences.getInstance();
+    // var uri = prefs.getString('url');
+    GetxSettings getxSettings = Get.find<GetxSettings>();
+    final url = Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/login'); // 替换成你的登录接口URL
     final Map<String, String> headers = {'Content-Type': 'application/json'};
 
     final Map<String, dynamic> requestBody = {
       'username': username,
       'password': password,
     };
-    var box = await Hive.openBox('settingsBox');
-    AppSettings appSettings = box.get('settings');
+    // var box = await Hive.openBox('settingsBox');
+    // AppSettings appSettings = box.get('settings');
 
     try {
       var response = await http.post(
@@ -46,26 +49,33 @@ class _loginState extends State<login> {
         String cookie = response.headers['set-cookie'] ?? '';
         var temp = cookie.split('pekoToken=');
         cookie = temp[temp.length-1].split(';')[0];
-        await prefs.setString('token', cookie);
-        appSettings.token = cookie;
+        // await prefs.setString('token', cookie);
+        // appSettings.token = cookie;
+        GetxSettings getxSettings = Get.find<GetxSettings>();
+        getxSettings.appSettings.value.token = cookie;
+        getxSettings.updateSettings(getxSettings.appSettings.value);
         print('Login successful. Cookie: $cookie');
 
         final Map<String, String> json = {
           'jwt': cookie,
         };
         response = await http.post(
-          Uri.parse('$uri/userinfo'),
+          Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/userinfo'),
           headers: headers,
           body: jsonEncode(json)
         );
         if (response.statusCode == 200) {
           final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-          prefs.setInt('user_id', jsonResponse['user_id']);
-          prefs.setString('username', jsonResponse['username']);
-          prefs.setInt('user_authority', jsonResponse['user_authority']);
-          appSettings.username = jsonResponse['username'];
-          appSettings.authority = jsonResponse['user_authority'];
-          box.put('settings', appSettings);
+          // prefs.setInt('user_id', jsonResponse['user_id']);
+          // prefs.setString('username', jsonResponse['username']);
+          // prefs.setInt('user_authority', jsonResponse['user_authority']);
+          // appSettings.username = jsonResponse['username'];
+          // appSettings.authority = jsonResponse['user_authority'];
+          // box.put('settings', appSettings);
+          GetxSettings getxSettings = Get.find<GetxSettings>();
+          getxSettings.appSettings.value.username = jsonResponse['username'];
+          getxSettings.appSettings.value.authority = jsonResponse['user_authority'];
+          getxSettings.updateSettings(getxSettings.appSettings.value);
           return true;
         }else{
           return false;

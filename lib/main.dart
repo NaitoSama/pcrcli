@@ -18,13 +18,18 @@ import 'login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await hiveInit();
   var routeNum = await initState();
-  hiveInit();
   runApp(MyApp(routeNum));
 }
 
 Future<int> initState() async {
   Get.put(HomeData());
+  Get.put(GetxSettings());
+
+  GetxSettings getxSettings = Get.find<GetxSettings>();
+  var settingsBox = await Hive.openBox('settingsBox');
+  getxSettings.appSettings.value = settingsBox.get('settings');
 
 
   int routeNum = 0;
@@ -55,8 +60,8 @@ Future<void> hiveInit() async {
     settings.initIndex();
     await box.put('settings', settings);
   }
-  AppSettings appSettings = box.get('settings');
-  print(appSettings.getIndex);
+  // AppSettings appSettings = box.get('settings');
+  // print(appSettings.getIndex);
 }
 
 class HomeData extends GetxController {
