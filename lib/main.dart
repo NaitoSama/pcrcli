@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pcrcli/register.dart';
 import 'package:pcrcli/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,7 +51,8 @@ Future<int> initState() async {
 }
 
 Future<void> hiveInit() async {
-  var path = Directory.current.path;
+  var appDocumentDirectory = await getApplicationDocumentsDirectory();
+  String path = appDocumentDirectory.path;
   Hive
     ..init(path)
     ..registerAdapter(AppSettingsAdapter());
