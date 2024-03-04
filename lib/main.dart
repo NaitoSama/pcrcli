@@ -30,14 +30,14 @@ Future<int> initState() async {
   int routeNum = 0;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? url = prefs.getString('url');
-  // url = '';
+  url = '';
   if (url == null || url == ''){
     routeNum = 0;
   }else{
     routeNum = 1;
   }
   String? token = prefs.getString('token');
-  // token = '';
+  token = '';
   if (!(token == null || token == '')){
     routeNum = 2;
   }

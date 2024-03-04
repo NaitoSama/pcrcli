@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pcrcli/main.dart';
+import 'package:pcrcli/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
@@ -26,6 +28,8 @@ class _bossPageState extends State<bossPage> {
   late WebSocketChannel ws;
   late String token;
   late String url;
+  // late Box<dynamic> settingsBox;
+  late AppSettings appSettings;
   int counter = 0;
 
 
@@ -34,9 +38,13 @@ class _bossPageState extends State<bossPage> {
 
 
   Future _loadPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    url = prefs.getString('url') ?? '';
-    token = prefs.getString('token') ?? '';
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    var settingsBox = await Hive.openBox('settingsBox');
+    appSettings = settingsBox.get('settings');
+    // url = prefs.getString('url') ?? '';
+    url = appSettings.remoteServerUrl;
+    // token = prefs.getString('token') ?? '';
+    token = appSettings.token;
     ws = IOWebSocketChannel.connect(
         '${url.replaceFirst('http', 'ws')}/v1/ws',
         headers: {
@@ -308,7 +316,8 @@ class _bossPageState extends State<bossPage> {
                     homeData.appendRecord('test');
                   },
                   child: Text('add record board test')
-              )
+              ),
+              Text('${appSettings.remoteServerUrl},${appSettings.username}${appSettings.authority},${appSettings.token}'),
             ],
           );
         }

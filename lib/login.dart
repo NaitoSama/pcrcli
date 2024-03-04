@@ -31,6 +31,8 @@ class _loginState extends State<login> {
       'username': username,
       'password': password,
     };
+    var box = await Hive.openBox('settingsBox');
+    AppSettings appSettings = box.get('settings');
 
     try {
       var response = await http.post(
@@ -45,6 +47,7 @@ class _loginState extends State<login> {
         var temp = cookie.split('pekoToken=');
         cookie = temp[temp.length-1].split(';')[0];
         await prefs.setString('token', cookie);
+        appSettings.token = cookie;
         print('Login successful. Cookie: $cookie');
 
         final Map<String, String> json = {
@@ -60,8 +63,6 @@ class _loginState extends State<login> {
           prefs.setInt('user_id', jsonResponse['user_id']);
           prefs.setString('username', jsonResponse['username']);
           prefs.setInt('user_authority', jsonResponse['user_authority']);
-          var box = await Hive.openBox('settingsBox');
-          AppSettings appSettings = box.get('settings');
           appSettings.username = jsonResponse['username'];
           appSettings.authority = jsonResponse['user_authority'];
           box.put('settings', appSettings);
