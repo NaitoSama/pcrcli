@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/register.dart';
 import 'package:http/http.dart' as http;
+import 'package:pcrcli/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,6 +60,11 @@ class _loginState extends State<login> {
           prefs.setInt('user_id', jsonResponse['user_id']);
           prefs.setString('username', jsonResponse['username']);
           prefs.setInt('user_authority', jsonResponse['user_authority']);
+          var box = await Hive.openBox('settingsBox');
+          AppSettings appSettings = box.get('settings');
+          appSettings.username = jsonResponse['username'];
+          appSettings.authority = jsonResponse['user_authority'];
+          box.put('settings', appSettings);
           return true;
         }else{
           return false;

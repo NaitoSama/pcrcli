@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:pcrcli/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'login.dart';
@@ -44,6 +46,11 @@ class _StartUpState extends State<StartUp> {
 
     // Save the counter value to persistent storage under the 'counter' key.
     await prefs.setString('url', url);
+    var box = await Hive.openBox('settingsBox');
+    AppSettings appSettings = box.get('settings');
+    appSettings.remoteServerUrl = url;
+    appSettings.isUrlConfirmed = true;
+    box.put('settings', appSettings);
   }
   Future<void> wrongAddDialog() {
     return showDialog<bool>(
