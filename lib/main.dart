@@ -30,14 +30,14 @@ Future<int> initState() async {
   int routeNum = 0;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? url = prefs.getString('url');
-  url = '';
+  // url = '';
   if (url == null || url == ''){
     routeNum = 0;
   }else{
     routeNum = 1;
   }
   String? token = prefs.getString('token');
-  token = '';
+  // token = '';
   if (!(token == null || token == '')){
     routeNum = 2;
   }
@@ -141,15 +141,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    StatefulWidget home = const StartUp();
+    // StatefulWidget home = const StartUp();
+    String homePage = '/startup';
     switch(routeNum){
       case 0:
         break;
       case 1:
-        home = const login();
+        // home = const login();
+        homePage = '/login';
         break;
       case 2:
-        home = const bossPage();
+        // home = const bossPage();
+        homePage = '/home';
         break;
       default:
         break;
@@ -178,7 +181,14 @@ class MyApp extends StatelessWidget {
         //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         //   useMaterial3: true,
         // ),
-        home: home,
+        routes: {
+          '/startup': (context) => StartUp(),
+          '/login': (context) => login(),
+          '/register': (context) => register(),
+          '/home': (context) => bossPage(),
+        },
+        initialRoute: homePage,
+        // home: home,
       ),
     );
   }

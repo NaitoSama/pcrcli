@@ -269,9 +269,10 @@ class _registerState extends State<register> {
                           onPressed: () async {
                             // 按钮被点击时执行的操作
                             if (await sendRegisterRequest(username.text, password.text, code.text)){
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => bossPage()),
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                '/home', // home 页面的路由名称
+                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
                               );
                             }else{
                               wrongRegisterDialog();

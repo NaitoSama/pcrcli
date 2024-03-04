@@ -230,9 +230,10 @@ class _loginState extends State<login> {
                           onPressed: () async {
                             // 按钮被点击时执行的操作
                             if(await sendLoginRequest(username.text,password.text)){
-                              Navigator.push(
+                              Navigator.pushNamedAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (context) => bossPage()),
+                                '/home', // home 页面的路由名称
+                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
                               );
                             }else{
                               wrongLoginDialog();
@@ -272,10 +273,7 @@ class _loginState extends State<login> {
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 // Navigate to the registration page
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => register()),
-                                );
+                                Navigator.pushNamed(context, '/register');
                               },
                           )
                         ],

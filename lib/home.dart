@@ -37,7 +37,7 @@ class _StartUpState extends State<StartUp> {
       return false;
     }
   }
-  void setUrl(String ip,String port) async {
+  Future<void> setUrl(String ip,String port) async {
     String url = 'http://$ip:$port';
     // Load and obtain the shared preferences for this app.
     final prefs = await SharedPreferences.getInstance();
@@ -214,11 +214,12 @@ class _StartUpState extends State<StartUp> {
                             // String address = ipAdd.text + ':' + port.text;
                             bool result = await getUrl(ipAdd.text,port.text);
                             if(result){
-                              setUrl(ipAdd.text, port.text);
+                              await setUrl(ipAdd.text, port.text);
                               // todo go to login page
-                              Navigator.push(
+                              Navigator.pushNamedAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (context) => login()),
+                                '/login', // home 页面的路由名称
+                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
                               );
                             }else{
                               wrongAddDialog();
