@@ -560,17 +560,17 @@ class _bossCMDState extends State<bossCMD> {
   late int authority;
   int round = 1;
   @override
-  void initState() {
-    super.initState();
-    _loadStoredValue();
-  }
+  // void initState() {
+  //   super.initState();
+  //   _loadStoredValue();
+  // }
 
-  Future<void> _loadStoredValue() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      authority = prefs.getInt('user_authority') ?? 0;
-    });
-  }
+  // Future<void> _loadStoredValue() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     authority = prefs.getInt('user_authority') ?? 0;
+  //   });
+  // }
   @override
   Widget build(BuildContext context) {
     return Container(
