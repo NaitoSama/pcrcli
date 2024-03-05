@@ -49,6 +49,7 @@ class _StartUpState extends State<StartUp> {
     // await prefs.setString('url', url);
     GetxSettings getxSettings = Get.find<GetxSettings>();
     getxSettings.appSettings.value.remoteServerUrl = url;
+    getxSettings.appSettings.value.isUrlConfirmed = true;
     getxSettings.updateSettings(getxSettings.appSettings.value);
   }
   Future<void> wrongAddDialog() {

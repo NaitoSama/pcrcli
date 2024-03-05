@@ -76,6 +76,7 @@ class _registerState extends State<register> {
           GetxSettings getxSettings = Get.find<GetxSettings>();
           getxSettings.appSettings.value.username = jsonResponse['username'];
           getxSettings.appSettings.value.authority = jsonResponse['user_authority'];
+          getxSettings.appSettings.value.isLoggedIn = true;
           getxSettings.updateSettings(getxSettings.appSettings.value);
           return true;
         }else{
