@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pcrcli/global.dart';
 import 'package:pcrcli/register.dart';
 import 'package:pcrcli/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,21 +30,21 @@ Future<int> initState() async {
   Get.put(GetxSettings());
 
   GetxSettings getxSettings = Get.find<GetxSettings>();
-  var settingsBox = await Hive.openBox('settingsBox');
+  var settingsBox = Hive.box('settingsBox');
   getxSettings.appSettings.value = settingsBox.get('settings');
 
 
   int routeNum = 0;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? url = prefs.getString('url');
-  url = '';
+  url = debugMode? '' : url;
   if (url == null || url == ''){
     routeNum = 0;
   }else{
     routeNum = 1;
   }
   String? token = prefs.getString('token');
-  token = '';
+  token = debugMode? '' : token;
   if (!(token == null || token == '')){
     routeNum = 2;
   }

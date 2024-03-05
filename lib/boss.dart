@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pcrcli/global.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/settings.dart';
 import 'package:provider/provider.dart';
@@ -318,7 +319,7 @@ class _bossPageState extends State<bossPage> {
                   },
                   child: Text('add record board test')
               ),
-              Text('${getxSettings.appSettings.value.remoteServerUrl},${getxSettings.appSettings.value.username}${getxSettings.appSettings.value.authority},${getxSettings.appSettings.value.token}'),
+              Visibility(visible: debugMode, child: Text('${getxSettings.appSettings.value.remoteServerUrl},${getxSettings.appSettings.value.username}${getxSettings.appSettings.value.authority},${getxSettings.appSettings.value.token}')),
             ],
           );
         }
