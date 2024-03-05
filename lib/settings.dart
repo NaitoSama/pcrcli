@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 
 part 'settings.g.dart';
 
+// use 'flutter packages pub run build_runner build' to generate xxx.g.dart
 @HiveType(typeId: 0)
 class AppSettings {
   @HiveField(0)
@@ -21,6 +24,10 @@ class AppSettings {
   int authority = 0;
   @HiveField(7)
   String token = '';
+  // @HiveField(8)
+  // List<String> bossPicETag = ['','','','',''];
+  @HiveField(9)
+  Map<String, Uint8List> eTagToPic = {};
 
   void initIndex(){
     for(int i = 1;i<=7;i++){
@@ -32,6 +39,7 @@ class AppSettings {
       case 5:getIndex['username'] = 5;break;
       case 6:getIndex['authority'] = 6;break;
       case 7:getIndex['token'] = 7;break;
+      case 8:getIndex['bossPicETag'] = 8;break;
       }
     }
   }

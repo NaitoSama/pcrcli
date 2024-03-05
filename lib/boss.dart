@@ -85,6 +85,8 @@ class _bossPageState extends State<bossPage> {
     response = await request.send();
     jsonString = await response.stream.bytesToString();
     data = jsonDecode(jsonString);
+    GetxSettings getxSettings = Get.find<GetxSettings>();
+    int j = 0;
     for(Map<String,dynamic> i in data) {
       print('i: $i');
       BossInfo boss = BossInfo(
@@ -95,10 +97,13 @@ class _bossPageState extends State<bossPage> {
         valueD:i['ValueD'],
         attacking:i['WhoIsIn'],
         tree:(i['Tree'] as String).split('|'),
+        picETag: i['PicETag']
       );
+      // getxSettings.appSettings.value.bossPicETag[j++] = i['PicETag'];
       // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
       homeData.updateBoss(boss, boss.bossID);
     }
+    // getxSettings.updateSettings(getxSettings.appSettings.value);
   }
 
   void handleWebsocketMessage(dynamic message) {
@@ -369,7 +374,9 @@ class _bossCardState extends State<bossCard> {
   late String bossImg;
   late dynamic appState;
   late String url;
+  late String picETag;
   var homeData = Get.find<HomeData>();
+  var getxSettings = Get.find<GetxSettings>();
 
   // 选择图片
   Future<void> _pickImage() async {
@@ -425,6 +432,25 @@ class _bossCardState extends State<bossCard> {
     }
   }
 
+  Future<void> _loadPic() async {
+    switch(bossID){
+      case 1:picETag = homeData.boss1.value.picETag;break;
+      case 2:picETag = homeData.boss2.value.picETag;break;
+      case 3:picETag = homeData.boss3.value.picETag;break;
+      case 4:picETag = homeData.boss4.value.picETag;break;
+      case 5:picETag = homeData.boss5.value.picETag;break;
+    }
+    if (!getxSettings.appSettings.value.eTagToPic.containsKey(picETag)){
+      final response = await http.get(Uri.parse(bossImg));
+      if (response.statusCode == 200) {
+        getxSettings.appSettings.value.eTagToPic[picETag] = response.bodyBytes;
+        getxSettings.updateSettings(getxSettings.appSettings.value);
+      } else {
+        throw Exception('Failed to fetch image: ${response.statusCode}');
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -467,11 +493,27 @@ class _bossCardState extends State<bossCard> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.network(
-                    bossImg,
-                    width: 80,
-                    height: 80,
-                    // fit: BoxFit.cover,
+                  child: FutureBuilder(
+                      future: _loadPic(),
+                      builder: (context,snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done){
+                          if (snapshot.hasError) {
+                            // 请求失败，显示错误
+                            print("Error: ${snapshot.error}");
+                            return ErrorWidget('Failed to load image');
+                          } else {
+                            // 请求成功，显示数据
+                            return Image.memory(
+                              getxSettings.appSettings.value.eTagToPic[picETag]!,
+                              width: 80,
+                              height: 80,
+                            );
+                          }
+                        } else {
+                          // 请求未结束，显示loading
+                          return CircularProgressIndicator();
+                        }
+                    }
                   ),
                 ),
                 Expanded(
@@ -557,6 +599,7 @@ class bossCMD extends StatefulWidget {
 class _bossCMDState extends State<bossCMD> {
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
+  GetxSettings getxSettings = Get.find<GetxSettings>();
   late int authority;
   int round = 1;
   @override
@@ -573,6 +616,7 @@ class _bossCMDState extends State<bossCMD> {
   // }
   @override
   Widget build(BuildContext context) {
+    authority = getxSettings.appSettings.value.authority;
     return Container(
         decoration: BoxDecoration(
           color: Colors.white,

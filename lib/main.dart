@@ -103,6 +103,7 @@ class BossInfo {
   int valueD = 0;
   List<String> tree = [' ',];
   String attacking = ' ';
+  String picETag = '';
   BossInfo({
     this.bossID = 0,
     this.stage = 0,
@@ -111,6 +112,7 @@ class BossInfo {
     this.valueD = 0,
     this.attacking = '',
     this.tree = const [''],
+    this.picETag = '',
   });
 }
 
