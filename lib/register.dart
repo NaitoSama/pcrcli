@@ -28,7 +28,7 @@ class _registerState extends State<register> {
     // final prefs = await SharedPreferences.getInstance();
     // var uri = prefs.getString('url');
     GetxSettings getxSettings = Get.find<GetxSettings>();
-    final url = Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/login'); // 替换成你的登录接口URL
+    final url = Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/register'); // 替换成你的登录接口URL
     final Map<String, String> headers = {'Content-Type': 'application/json'};
 
     final Map<String, dynamic> requestBody = {

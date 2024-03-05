@@ -36,16 +36,17 @@ Future<int> initState() async {
 
   int routeNum = 0;
   // SharedPreferences prefs = await SharedPreferences.getInstance();
-  String url = getxSettings.appSettings.value.remoteServerUrl;
-  url = debugMode? '' : url;
-  if (!getxSettings.appSettings.value.isUrlConfirmed){
+  // String url = getxSettings.appSettings.value.remoteServerUrl;
+  bool isUrl = debugMode?false:getxSettings.appSettings.value.isUrlConfirmed;
+  bool isLogin = debugMode?false:getxSettings.appSettings.value.isLoggedIn;
+  if (!isUrl){
     routeNum = 0;
   }else{
     routeNum = 1;
   }
   String token = getxSettings.appSettings.value.token;
-  token = debugMode? '' : token;
-  if (getxSettings.appSettings.value.isLoggedIn){
+  // token = debugMode? '' : token;
+  if (isLogin){
     routeNum = 2;
   }
   return routeNum;
