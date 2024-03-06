@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:pcrcli/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'global.dart';
 import 'login.dart';
 
 class StartUp extends StatefulWidget {
@@ -25,7 +26,7 @@ class _StartUpState extends State<StartUp> {
       return false;
     }
     try {
-      Uri uri = Uri.parse('http://$ip:$port/test');
+      Uri uri = Uri.parse('$httpProtocol://$ip:$port/test');
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
@@ -41,7 +42,7 @@ class _StartUpState extends State<StartUp> {
     }
   }
   Future<void> setUrl(String ip,String port) async {
-    String url = 'http://$ip:$port';
+    String url = '$httpProtocol://$ip:$port';
     // Load and obtain the shared preferences for this app.
     // final prefs = await SharedPreferences.getInstance();
 
