@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pcrcli/common.dart';
 import 'package:pcrcli/global.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/settings.dart';
@@ -152,7 +155,21 @@ class _bossPageState extends State<bossPage> {
           valueD:data['ValueD'],
           attacking:data['WhoIsIn'],
           tree:(data['Tree'] as String).split('|'),
+          picETag: data['PicETag'],
         );
+        // late BossInfo nowBoss;
+        // switch(boss.bossID){
+        //   case 1:nowBoss = homeData.boss1.value;break;
+        //   case 2:nowBoss = homeData.boss2.value;break;
+        //   case 3:nowBoss = homeData.boss3.value;break;
+        //   case 4:nowBoss = homeData.boss4.value;break;
+        //   case 5:nowBoss = homeData.boss5.value;break;
+        // }
+        // if (boss.picETag != nowBoss.picETag){
+        //
+        //   // setState(() {
+        //   // });
+        // }
         // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
         homeData.updateBoss(boss,boss.bossID);
       }else if (data.containsKey('BeforeBossStage')){
@@ -379,58 +396,67 @@ class _bossCardState extends State<bossCard> {
   var getxSettings = Get.find<GetxSettings>();
 
   // 选择图片
-  Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      // 裁剪图片
-      File? croppedImage = await _cropImage(File(pickedFile.path));
-
-      if (croppedImage != null) {
-
-        // 上传图片
-        await _uploadImage(croppedImage);
-
-        // 刷新页面
-        setState(() {});
-      }
-    }
-  }
+  // Future<void> _pickImage(int bossID) async {
+  //   final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+  //
+  //   if (pickedFile != null) {
+  //     // 裁剪图片
+  //     File? croppedImage = await _cropImage(File(pickedFile.path));
+  //
+  //     if (croppedImage != null) {
+  //
+  //       // 上传图片
+  //       await _uploadImage(croppedImage,bossID);
+  //
+  //       // 刷新页面
+  //       // setState(() {});
+  //     }
+  //   }
+  // }
 
   // 裁剪图片
-  Future<File?> _cropImage(File image) async {
-    return await ImageCropper().cropImage(
-      sourcePath: image.path,
-      aspectRatioPresets: [
-        CropAspectRatioPreset.square,
-        // CropAspectRatioPreset.original,
-      ],
-      androidUiSettings: AndroidUiSettings(
-        toolbarTitle: 'Crop Image',
-        toolbarColor: Colors.deepOrange,
-        toolbarWidgetColor: Colors.white,
-        initAspectRatio: CropAspectRatioPreset.original,
-        lockAspectRatio: false,
-      ),
-    );
-  }
+  // Future<File?> _cropImage(File image) async {
+  //   return await ImageCropper().cropImage(
+  //     sourcePath: image.path,
+  //     aspectRatioPresets: [
+  //       CropAspectRatioPreset.square,
+  //       // CropAspectRatioPreset.original,
+  //     ],
+  //     androidUiSettings: AndroidUiSettings(
+  //       toolbarTitle: 'Crop Image',
+  //       toolbarColor: Colors.deepOrange,
+  //       toolbarWidgetColor: Colors.white,
+  //       initAspectRatio: CropAspectRatioPreset.original,
+  //       lockAspectRatio: false,
+  //     ),
+  //   );
+  // }
 
   // 上传图片
-  Future<void> _uploadImage(File image) async {
-    final uri = Uri.parse(url);
-    var request = http.MultipartRequest('POST', uri);
-
-    request.files.add(await http.MultipartFile.fromPath('pic', image.path));
-
-    var response = await request.send();
-    if (response.statusCode == 200) {
-      // 上传成功
-      print('Image uploaded successfully!');
-    } else {
-      // 上传失败
-      print('Image upload failed with status code: ${response.statusCode}');
-    }
-  }
+  // Future<void> _uploadImage(File image, int bossID) async {
+  //
+  //   // final uri = Uri.parse(url);
+  //   // var request = http.MultipartRequest('POST', uri);
+  //   //
+  //   // request.files.add(await http.MultipartFile.fromPath('pic', image.path));
+  //
+  //   var req = SendReq(
+  //     2,
+  //     '$url/v1/uploadbosspic',
+  //     token: getxSettings.appSettings.value.token,
+  //     query: {'boss':'$bossID'},
+  //     file: image.path,
+  //     fileKey: 'pic',
+  //   );
+  //   var response = await req.send();
+  //   if (response?.statusCode == 200) {
+  //     // 上传成功
+  //     print('Image uploaded successfully!');
+  //   } else {
+  //     // 上传失败
+  //     print('Image upload failed with status code: ${response?.statusCode}');
+  //   }
+  // }
 
   Future<void> _loadPic() async {
     switch(bossID){
@@ -493,7 +519,7 @@ class _bossCardState extends State<bossCard> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: FutureBuilder(
+                  child: Obx(() => FutureBuilder(
                       future: _loadPic(),
                       builder: (context,snapshot) {
                         if (snapshot.connectionState == ConnectionState.done){
@@ -503,18 +529,21 @@ class _bossCardState extends State<bossCard> {
                             return ErrorWidget('Failed to load image');
                           } else {
                             // 请求成功，显示数据
-                            return Image.memory(
-                              getxSettings.appSettings.value.eTagToPic[picETag]!,
-                              width: 80,
-                              height: 80,
+                            return CircleAvatar(
+                              radius: 30,
+                              child: Image.memory(
+                                getxSettings.appSettings.value.eTagToPic[picETag]!,
+                                width: 80,
+                                height: 80,
+                              ),
                             );
                           }
                         } else {
                           // 请求未结束，显示loading
                           return CircularProgressIndicator();
                         }
-                    }
-                  ),
+                      }
+                  ),)
                 ),
                 Expanded(
                   child: Padding(
@@ -615,6 +644,114 @@ class _bossCMDState extends State<bossCMD> {
   //   });
   // }
   @override
+
+  // 选择图片
+  Future<void> _pickImage(int bossID) async {
+    // final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      var originalImage = File(pickedFile.path);
+      var imageBytes = await originalImage.readAsBytes();
+      List<int> compressedBytes = await FlutterImageCompress.compressWithList(
+        imageBytes,
+        minHeight: 1920,
+        minWidth: 1080,
+        quality: 90,
+        format: CompressFormat.jpeg,
+      );
+
+      Directory tempDir = await getTemporaryDirectory();
+      String tempPath = tempDir.path;
+      String imagePath = '$tempPath/converted_image.jpg'; // Path to save the converted JPEG image
+      File imageFile = File(imagePath);
+      await imageFile.writeAsBytes(compressedBytes);
+
+
+      // 裁剪图片
+      CroppedFile? croppedImage = await _cropImage(imageFile);
+      // CroppedFile? croppedImage = await _cropImage(File(pickedFile.path));
+
+      if (croppedImage != null) {
+
+        // 上传图片
+        await _uploadImage(croppedImage,bossID);
+
+        // 刷新页面
+        // setState(() {});
+      }
+    }
+  }
+
+  // 裁剪图片
+  Future<CroppedFile?> _cropImage(File image) async {
+    return await ImageCropper().cropImage(
+      sourcePath: image.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        // CropAspectRatioPreset.ratio3x2,
+        // CropAspectRatioPreset.original,
+        // CropAspectRatioPreset.ratio4x3,
+        // CropAspectRatioPreset.ratio16x9
+      ],
+      uiSettings: [
+        AndroidUiSettings(
+            toolbarTitle: '裁剪',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: false),
+        IOSUiSettings(
+          title: 'Cropper',
+        ),
+        WebUiSettings(
+          context: context,
+        ),
+      ],
+    );
+    // return await ImageCropper().cropImage(
+    //   sourcePath: image.path,
+      // aspectRatioPresets: [
+      //   CropAspectRatioPreset.square,
+      //   // CropAspectRatioPreset.original,
+      // ],
+      // androidUiSettings: AndroidUiSettings(
+      //   toolbarTitle: 'Crop Image',
+      //   toolbarColor: Colors.deepOrange,
+      //   toolbarWidgetColor: Colors.white,
+      //   initAspectRatio: CropAspectRatioPreset.original,
+      //   lockAspectRatio: false,
+      // ),
+    // );
+  }
+
+  // 上传图片
+  Future<void> _uploadImage(CroppedFile? image, int bossID) async {
+
+    // final uri = Uri.parse(url);
+    // var request = http.MultipartRequest('POST', uri);
+    //
+    // request.files.add(await http.MultipartFile.fromPath('pic', image.path));
+
+    var req = SendReq(
+      2,
+      '${getxSettings.appSettings.value.remoteServerUrl}/v1/uploadbosspic',
+      token: getxSettings.appSettings.value.token,
+      query: {'boss':'$bossID'},
+      file: image?.path,
+      fileKey: 'pic',
+    );
+    var response = await req.send();
+    if (response?.statusCode == 200) {
+      // 上传成功
+      print('Image uploaded successfully!');
+    } else {
+      // 上传失败
+      print('Image upload failed with status code: ${response?.statusCode}');
+    }
+  }
+
+
   Widget build(BuildContext context) {
     authority = getxSettings.appSettings.value.authority;
     return Container(
@@ -972,18 +1109,45 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                         onPressed: (){
-                          Map<String,dynamic> jsonData = {
-                            "type":"revise",
-                            "revise_boss":{
-                              "boss_id":widget.bossID,
-                              "value":int.parse(_revise.text),
-                              "round":round
-                            },
-                            "token":widget.token,
-                          };
-                          String jsonString = json.encode(jsonData);
-                          widget.ws.sink.add(jsonString);
-                          Navigator.of(context).pop();
+                          try{
+                            _pickImage(widget.bossID);
+                                (){
+                              return showDialog<bool>(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("上传成功"),
+                                    content: Text("上传成功了捏"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text("确认"),
+                                        onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            };
+                          }catch (e) {
+                            (){
+                              return showDialog<bool>(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("上传失败"),
+                                    content: Text("err: $e"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text("确认"),
+                                        onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            };
+                          }
+
                         },
                         child: Text('上传图片',style: TextStyle(color: Colors.black),)),
                   ],
