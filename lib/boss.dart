@@ -241,7 +241,7 @@ class _bossPageState extends State<bossPage> {
             }
           } else {
             // 请求未结束，显示loading
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           }
 
 

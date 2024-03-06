@@ -23,6 +23,8 @@ class _registerState extends State<register> {
   final username = TextEditingController();
   final password = TextEditingController();
   final code = TextEditingController();
+  FocusNode focusNode1 = FocusNode();
+  FocusNode focusNode2 = FocusNode();
 
   Future<bool> sendRegisterRequest(String username, String password, String code) async {
     // final prefs = await SharedPreferences.getInstance();
@@ -111,6 +113,17 @@ class _registerState extends State<register> {
       },
     );
   }
+  Future<void> _register() async {
+    if (await sendRegisterRequest(username.text, password.text, code.text)){
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home', // home 页面的路由名称
+            (route) => false, // 移除条件，始终为 false，表示移除所有页面
+      );
+    }else{
+      wrongRegisterDialog();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +160,9 @@ class _registerState extends State<register> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextFormField(
+                    onEditingComplete: (){
+                      FocusScope.of(context).requestFocus(focusNode1);
+                    },
                     controller: username,
                     obscureText: false,
                     decoration: InputDecoration(
@@ -187,6 +203,10 @@ class _registerState extends State<register> {
                   //   height: 20,
                   // ),
                   TextFormField(
+                    focusNode: focusNode1,
+                    onEditingComplete: (){
+                      FocusScope.of(context).requestFocus(focusNode2);
+                    },
                     controller: password,
                     obscureText: true,
                     decoration: InputDecoration(
@@ -227,6 +247,10 @@ class _registerState extends State<register> {
                   //   height: 20,
                   // ),
                   TextFormField(
+                    onEditingComplete: (){
+                      _register();
+                    },
+                    focusNode: focusNode2,
                     controller: code,
                     obscureText: false,
                     decoration: InputDecoration(
@@ -286,15 +310,7 @@ class _registerState extends State<register> {
 
                           onPressed: () async {
                             // 按钮被点击时执行的操作
-                            if (await sendRegisterRequest(username.text, password.text, code.text)){
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/home', // home 页面的路由名称
-                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
-                              );
-                            }else{
-                              wrongRegisterDialog();
-                            }
+                            _register();
 
                           },
 

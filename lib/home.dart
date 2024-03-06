@@ -21,6 +21,7 @@ class StartUp extends StatefulWidget {
 class _StartUpState extends State<StartUp> {
   final ipAdd = TextEditingController();
   final port = TextEditingController();
+  FocusNode focusNode1 = FocusNode();
   Future<bool> getUrl(String ip,String port) async {
     if ( ip=='' || port=='' ){
       return false;
@@ -70,6 +71,20 @@ class _StartUpState extends State<StartUp> {
       },
     );
   }
+  Future<void> _commit()async{
+    bool result = await getUrl(ipAdd.text,port.text);
+    if(result){
+      await setUrl(ipAdd.text, port.text);
+      // todo go to login page
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login', // home 页面的路由名称
+            (route) => false, // 移除条件，始终为 false，表示移除所有页面
+      );
+    }else{
+      wrongAddDialog();
+    }
+  }
 
   @override
 
@@ -114,6 +129,9 @@ class _StartUpState extends State<StartUp> {
                     TextFormField(
                       controller: ipAdd,
                       obscureText: false,
+                      onEditingComplete: (){
+                        FocusScope.of(context).requestFocus(focusNode1);
+                      },
                       decoration: InputDecoration(
                         labelText: 'IP Address',
                         hintText: 'Enter IP address...',
@@ -152,6 +170,10 @@ class _StartUpState extends State<StartUp> {
                     //   height: 20,
                     // ),
                     TextFormField(
+                      onEditingComplete: (){
+                        _commit();
+                      },
+                      focusNode: focusNode1,
                       controller: port,
                       obscureText: false,
                       decoration: InputDecoration(
@@ -220,18 +242,7 @@ class _StartUpState extends State<StartUp> {
                             // String? url = await prefs.getString('url');
                             // print(url);
                             // String address = ipAdd.text + ':' + port.text;
-                            bool result = await getUrl(ipAdd.text,port.text);
-                            if(result){
-                              await setUrl(ipAdd.text, port.text);
-                              // todo go to login page
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/login', // home 页面的路由名称
-                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
-                              );
-                            }else{
-                              wrongAddDialog();
-                            }
+                            _commit();
                           },
 
                           child: const Text(

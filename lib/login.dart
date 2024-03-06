@@ -23,6 +23,7 @@ class login extends StatefulWidget {
 class _loginState extends State<login> {
   final username = TextEditingController();
   final password = TextEditingController();
+  FocusNode focusNode1 = FocusNode();
   Future<bool> sendLoginRequest(String username, String password) async {
     // final prefs = await SharedPreferences.getInstance();
     // var uri = prefs.getString('url');
@@ -111,6 +112,17 @@ class _loginState extends State<login> {
       },
     );
   }
+  Future<void> _login() async {
+    if(await sendLoginRequest(username.text,password.text)){
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home', // home 页面的路由名称
+            (route) => false, // 移除条件，始终为 false，表示移除所有页面
+      );
+    }else{
+      wrongLoginDialog();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,6 +158,9 @@ class _loginState extends State<login> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextFormField(
+                    onEditingComplete: (){
+                      FocusScope.of(context).requestFocus(focusNode1);
+                    },
                     controller: username,
                     obscureText: false,
                     decoration: InputDecoration(
@@ -186,6 +201,10 @@ class _loginState extends State<login> {
                   //   height: 20,
                   // ),
                   TextFormField(
+                    focusNode: focusNode1,
+                    onEditingComplete: (){
+                      _login();
+                    },
                     controller: password,
                     obscureText: true,
                     decoration: InputDecoration(
@@ -248,15 +267,7 @@ class _loginState extends State<login> {
 
                           onPressed: () async {
                             // 按钮被点击时执行的操作
-                            if(await sendLoginRequest(username.text,password.text)){
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/home', // home 页面的路由名称
-                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
-                              );
-                            }else{
-                              wrongLoginDialog();
-                            }
+                            _login();
 
                           },
 
