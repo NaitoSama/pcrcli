@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -1109,41 +1110,50 @@ class _bossCMDState extends State<bossCMD> {
                           ),
                         ),
                         onPressed: () async {
-                          BuildContext contextVar = context;
+                          // BuildContext contextVar = context;
+                          var cancel1 = BotToast.showLoading();
                           try{
+
+
                             await _pickImage(widget.bossID);
-                            showDialog<bool>(
-                                context: contextVar,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text("上传成功"),
-                                    content: Text("上传成功了捏"),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: Text("确认"),
-                                        onPressed: () => Navigator.of(context).pop(), // 关闭对话框
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
+                            cancel1();
+                            var cancel2 = BotToast.showText(text:"上传成功");
+                            // showDialog<bool>(
+                            //     context: contextVar,
+                            //     builder: (context) {
+                            //       return AlertDialog(
+                            //         title: Text("上传成功"),
+                            //         content: Text("上传成功了捏"),
+                            //         actions: <Widget>[
+                            //           TextButton(
+                            //             child: Text("确认"),
+                            //             onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+                            //           ),
+                            //         ],
+                            //       );
+                            //     },
+                            //   );
 
                           }catch (e) {
-                            showDialog<bool>(
-                                context: contextVar,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text("上传失败"),
-                                    content: Text("err: $e"),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: Text("确认"),
-                                        onPressed: () => Navigator.of(context).pop(), // 关闭对话框
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
+                            cancel1();
+                            var cancel2 = BotToast.showText(text:"上传失败\nerr: $e");
+                            // showDialog<bool>(
+                            //     context: contextVar,
+                            //     builder: (context) {
+                            //       return AlertDialog(
+                            //         title: Text("上传失败"),
+                            //         content: Text("err: $e"),
+                            //         actions: <Widget>[
+                            //           TextButton(
+                            //             child: Text("确认"),
+                            //             onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+                            //           ),
+                            //         ],
+                            //       );
+                            //     },
+                            //   );
+                          }finally{
+                            Navigator.pop(context);
                           }
 
                         },

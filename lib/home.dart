@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
@@ -72,9 +73,11 @@ class _StartUpState extends State<StartUp> {
     );
   }
   Future<void> _commit()async{
+    var cancel1 = BotToast.showLoading();
     bool result = await getUrl(ipAdd.text,port.text);
     if(result){
       await setUrl(ipAdd.text, port.text);
+      cancel1();
       // todo go to login page
       Navigator.pushNamedAndRemoveUntil(
         context,
@@ -82,6 +85,7 @@ class _StartUpState extends State<StartUp> {
             (route) => false, // 移除条件，始终为 false，表示移除所有页面
       );
     }else{
+      cancel1();
       wrongAddDialog();
     }
   }

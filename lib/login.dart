@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -113,13 +114,16 @@ class _loginState extends State<login> {
     );
   }
   Future<void> _login() async {
+    var cancel1 = BotToast.showLoading();
     if(await sendLoginRequest(username.text,password.text)){
+      cancel1();
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home', // home 页面的路由名称
             (route) => false, // 移除条件，始终为 false，表示移除所有页面
       );
     }else{
+      cancel1();
       wrongLoginDialog();
     }
   }
