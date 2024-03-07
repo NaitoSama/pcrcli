@@ -1108,12 +1108,12 @@ class _bossCMDState extends State<bossCMD> {
                             ),
                           ),
                         ),
-                        onPressed: (){
+                        onPressed: () async {
+                          BuildContext contextVar = context;
                           try{
-                            _pickImage(widget.bossID);
-                                (){
-                              return showDialog<bool>(
-                                context: context,
+                            await _pickImage(widget.bossID);
+                            showDialog<bool>(
+                                context: contextVar,
                                 builder: (context) {
                                   return AlertDialog(
                                     title: Text("上传成功"),
@@ -1127,11 +1127,10 @@ class _bossCMDState extends State<bossCMD> {
                                   );
                                 },
                               );
-                            };
+
                           }catch (e) {
-                            (){
-                              return showDialog<bool>(
-                                context: context,
+                            showDialog<bool>(
+                                context: contextVar,
                                 builder: (context) {
                                   return AlertDialog(
                                     title: Text("上传失败"),
@@ -1145,7 +1144,6 @@ class _bossCMDState extends State<bossCMD> {
                                   );
                                 },
                               );
-                            };
                           }
 
                         },
