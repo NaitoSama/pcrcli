@@ -13,6 +13,7 @@ import 'package:pcrcli/common.dart';
 import 'package:pcrcli/global.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/settings.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
@@ -563,11 +564,25 @@ class _bossCardState extends State<bossCard> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            LinearProgressIndicator(
-                              value: boss.valueC/boss.valueD,
-                              backgroundColor: Colors.grey[200],
-                              valueColor: AlwaysStoppedAnimation(Colors.blue),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: boss.valueC/boss.valueD,
+                                backgroundColor: Colors.grey[200],
+                                valueColor: AlwaysStoppedAnimation(Colors.blue),
+                              ),
                             ),
+
+                            // LinearPercentIndicator(
+                            //   animation: true,
+                            //   // width: 140.0,
+                            //   // lineHeight: 8.0,
+                            //   percent: boss.valueC/boss.valueD,
+                            //   // trailing: Icon(Icons.mood),
+                            //   linearStrokeCap: LinearStrokeCap.roundAll,
+                            //   backgroundColor: Colors.grey,
+                            //   progressColor: Colors.blue,
+                            // ),
                             Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
                               child: Column(
