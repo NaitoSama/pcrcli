@@ -1222,6 +1222,7 @@ class _recordBoardState extends State<recordBoard> {
   //   });
   // }
 
+  @override
   void didChangeDependencies(){
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {

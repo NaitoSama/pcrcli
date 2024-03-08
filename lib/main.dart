@@ -136,7 +136,7 @@ class HomeData extends GetxController {
     records.add(data);
   }
   void initRecord(List<String> data){
-    records=RxList<String>.from(data);
+    records.value = data;
   }
 }
 
