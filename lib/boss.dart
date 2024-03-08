@@ -461,13 +461,14 @@ class _bossCardState extends State<bossCard> {
   // }
 
   Future<void> _loadPic() async {
-    switch(bossID){
-      case 1:picETag = homeData.boss1.value.picETag;break;
-      case 2:picETag = homeData.boss2.value.picETag;break;
-      case 3:picETag = homeData.boss3.value.picETag;break;
-      case 4:picETag = homeData.boss4.value.picETag;break;
-      case 5:picETag = homeData.boss5.value.picETag;break;
-    }
+    // switch(bossID){
+    //   case 1:picETag = homeData.boss1.value.picETag;break;
+    //   case 2:picETag = homeData.boss2.value.picETag;break;
+    //   case 3:picETag = homeData.boss3.value.picETag;break;
+    //   case 4:picETag = homeData.boss4.value.picETag;break;
+    //   case 5:picETag = homeData.boss5.value.picETag;break;
+    // }
+    picETag = homeData.bosses[bossID - 1].value.picETag;
     if (!getxSettings.appSettings.value.eTagToPic.containsKey(picETag)){
       final response = await http.get(Uri.parse(bossImg));
       if (response.statusCode == 200) {
@@ -531,18 +532,28 @@ class _bossCardState extends State<bossCard> {
                             return ErrorWidget('Failed to load image');
                           } else {
                             // 请求成功，显示数据
-                            return CircleAvatar(
-                              radius: 30,
-                              child: Image.memory(
-                                getxSettings.appSettings.value.eTagToPic[picETag]!,
-                                width: 80,
-                                height: 80,
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              alignment: Alignment.center,
+                              child: ClipRRect(
+                                // foregroundImage: MemoryImage(getxSettings.appSettings.value.eTagToPic[picETag]!),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.memory(
+                                  getxSettings.appSettings.value.eTagToPic[picETag]!,
+                                  // width: 80,
+                                  height: 80,
+                                ),
                               ),
                             );
                           }
                         } else {
                           // 请求未结束，显示loading
-                          return CircularProgressIndicator();
+                          return Container(
+                              width: 80,
+                              height: 80,
+                              child: CircularProgressIndicator()
+                          );
                         }
                       }
                   ),)
@@ -550,28 +561,31 @@ class _bossCardState extends State<bossCard> {
                 Expanded(
                   child: Padding(
                     padding: EdgeInsetsDirectional.fromSTEB(12, 0, 0, 0),
-                    child: Obx(
-                      (){
-                        switch (bossID){
-                          case 1: boss = homeData.boss1.value;break;
-                          case 2: boss = homeData.boss2.value;break;
-                          case 3: boss = homeData.boss3.value;break;
-                          case 4: boss = homeData.boss4.value;break;
-                          case 5: boss = homeData.boss5.value;break;
-                        }
-                        return Column(
+                    child: Column(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(2),
-                              child: LinearProgressIndicator(
-                                value: boss.valueC/boss.valueD,
-                                backgroundColor: Colors.grey[200],
-                                valueColor: AlwaysStoppedAnimation(Colors.blue),
+                            Obx(() =>
+                              LinearPercentIndicator(
+                                percent: homeData.bosses[bossID - 1].value.valueC/homeData.bosses[bossID - 1].value.valueD,
+                                animation: true,
+                                animateFromLastPercent: true,
+                                barRadius: Radius.circular(3),
+                                progressColor: Colors.blue,
                               ),
                             ),
+                            // Obx(() =>
+                            //     ClipRRect(
+                            //       borderRadius: BorderRadius.circular(2),
+                            //       child: LinearProgressIndicator(
+                            //
+                            //         value: homeData.bosses[bossID - 1].valueC/homeData.bosses[bossID - 1].valueD,
+                            //         backgroundColor: Colors.grey[200],
+                            //         valueColor: AlwaysStoppedAnimation(Colors.blue),
+                            //       ),
+                            //     ),
+                            // ),
 
                             // LinearPercentIndicator(
                             //   animation: true,
@@ -583,30 +597,28 @@ class _bossCardState extends State<bossCard> {
                             //   backgroundColor: Colors.grey,
                             //   progressColor: Colors.blue,
                             // ),
-                            Padding(
+                            Obx(() => Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
                               child: Column(
                                   children: [
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
-                                        Text('${boss.stage}阶 ${boss.round}回'),
-                                        Text('${NumberFormat('#,##0').format(boss.valueC)}/${NumberFormat('#,##0').format(boss.valueD)}'),
+                                        Text('${homeData.bosses[bossID-1].value.stage}阶 ${homeData.bosses[bossID-1].value.round}回'),
+                                        Text('${NumberFormat('#,##0').format(homeData.bosses[bossID-1].value.valueC)}/${NumberFormat('#,##0').format(homeData.bosses[bossID-1].value.valueD)}'),
                                       ],
                                     ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
-                                        Text('攻击:${boss.attacking}'),
-                                        Text('挂树:${boss.tree[0]==' '?0:boss.tree.length}'),
+                                        Text('攻击:${homeData.bosses[bossID-1].value.attacking}'),
+                                        Text('挂树:${homeData.bosses[bossID-1].value.tree[0]==' '?0:homeData.bosses[bossID-1].value.tree.length}'),
                                       ],
                                     )
                                   ]
                               ),
-                            ),
+                            )),
                           ],
-                        );
-                      },
                     ),
                   ),
                 ),

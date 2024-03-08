@@ -71,22 +71,30 @@ Future<void> hiveInit() async {
 
 class HomeData extends GetxController {
   var records = <String>[].obs;
-  var boss1 = BossInfo(bossID: 1).obs;
-  var boss2 = BossInfo(bossID: 2).obs;
-  var boss3 = BossInfo(bossID: 3).obs;
-  var boss4 = BossInfo(bossID: 4).obs;
-  var boss5 = BossInfo(bossID: 5).obs;
+  List<Rx<BossInfo>> bosses = [
+    BossInfo(bossID: 1).obs,
+    BossInfo(bossID: 2).obs,
+    BossInfo(bossID: 3).obs,
+    BossInfo(bossID: 4).obs,
+    BossInfo(bossID: 5).obs,
+  ];
+  // var boss1 = BossInfo(bossID: 1).obs;
+  // var boss2 = BossInfo(bossID: 2).obs;
+  // var boss3 = BossInfo(bossID: 3).obs;
+  // var boss4 = BossInfo(bossID: 4).obs;
+  // var boss5 = BossInfo(bossID: 5).obs;
 
-  bool updateBoss(BossInfo bossInfo,int bossID) {
-    switch (bossID){
-      case 1:boss1.value = bossInfo;break;
-      case 2:boss2.value = bossInfo;break;
-      case 3:boss3.value = bossInfo;break;
-      case 4:boss4.value = bossInfo;break;
-      case 5:boss5.value = bossInfo;break;
-      default:return false;
-    }
-    return true;
+  void updateBoss(BossInfo bossInfo,int bossID) {
+    // switch (bossID){
+    //   case 1:boss1.value = bossInfo;break;
+    //   case 2:boss2.value = bossInfo;break;
+    //   case 3:boss3.value = bossInfo;break;
+    //   case 4:boss4.value = bossInfo;break;
+    //   case 5:boss5.value = bossInfo;break;
+    //   default:return false;
+    // }
+    bosses[bossID - 1].value = bossInfo;
+    // return true;
   }
 
   void appendRecord(String data){
