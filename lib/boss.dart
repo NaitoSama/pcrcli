@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -94,19 +95,18 @@ class _bossPageState extends State<bossPage> {
     int j = 0;
     for(Map<String,dynamic> i in data) {
       print('i: $i');
-      BossInfo boss = BossInfo(
-        bossID:i['ID'],
-        stage:i['Stage'],
-        round:i['Round'],
-        valueC:i['Value'],
-        valueD:i['ValueD'],
-        attacking:i['WhoIsIn'],
-        tree:(i['Tree'] as String).split('|'),
-        picETag: i['PicETag']
-      );
+      int bossID = i['ID'];
+      BossInfo boss = homeData.bosses[bossID - 1];
+      boss.stage.value = i['Stage'];
+      boss.round.value = i['Round'];
+      boss.valueC.value = i['Value'];
+      boss.valueD.value = i['ValueD'];
+      boss.attacking.value = i['WhoIsIn'];
+      boss.tree.value = (i['Tree'] as String).split('|');
+      boss.picETag.value = i['PicETag'];
       // getxSettings.appSettings.value.bossPicETag[j++] = i['PicETag'];
       // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
-      homeData.updateBoss(boss, boss.bossID);
+      // homeData.updateBoss(boss, boss.bossID.value);
     }
     // getxSettings.updateSettings(getxSettings.appSettings.value);
   }
@@ -149,16 +149,15 @@ class _bossPageState extends State<bossPage> {
 
     }else if (data is Map){
       if(data.containsKey('WhoIsIn')){
-        BossInfo boss = BossInfo(
-          bossID:data['ID'],
-          stage:data['Stage'],
-          round:data['Round'],
-          valueC:data['Value'],
-          valueD:data['ValueD'],
-          attacking:data['WhoIsIn'],
-          tree:(data['Tree'] as String).split('|'),
-          picETag: data['PicETag'],
-        );
+        int bossID = data['ID'];
+        BossInfo boss = homeData.bosses[bossID - 1];
+        boss.stage.value = data['Stage'];
+        boss.round.value = data['Round'];
+        boss.valueC.value = data['Value'];
+        boss.valueD.value = data['ValueD'];
+        boss.attacking.value = data['WhoIsIn'];
+        boss.tree.value = (data['Tree'] as String).split('|');
+        boss.picETag.value = data['PicETag'];
         // late BossInfo nowBoss;
         // switch(boss.bossID){
         //   case 1:nowBoss = homeData.boss1.value;break;
@@ -173,7 +172,7 @@ class _bossPageState extends State<bossPage> {
         //   // });
         // }
         // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
-        homeData.updateBoss(boss,boss.bossID);
+        // homeData.updateBoss(boss,boss.bossID.value);
       }else if (data.containsKey('BeforeBossStage')){
         if (recordsUniquenessCheck.contains(data['ID'])){
           return;
@@ -468,7 +467,7 @@ class _bossCardState extends State<bossCard> {
     //   case 4:picETag = homeData.boss4.value.picETag;break;
     //   case 5:picETag = homeData.boss5.value.picETag;break;
     // }
-    picETag = homeData.bosses[bossID - 1].value.picETag;
+    picETag = homeData.bosses[bossID - 1].picETag.value;
     if (!getxSettings.appSettings.value.eTagToPic.containsKey(picETag)){
       final response = await http.get(Uri.parse(bossImg));
       if (response.statusCode == 200) {
@@ -572,7 +571,7 @@ class _bossCardState extends State<bossCard> {
                           children: [
                             Obx(() =>
                               LinearPercentIndicator(
-                                percent: homeData.bosses[bossID - 1].value.valueC/homeData.bosses[bossID - 1].value.valueD,
+                                percent: homeData.bosses[bossID - 1].valueC.value/homeData.bosses[bossID - 1].valueD.value,
                                 animation: true,
                                 animateFromLastPercent: true,
                                 barRadius: Radius.circular(3),
@@ -608,15 +607,15 @@ class _bossCardState extends State<bossCard> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
-                                        Text('${homeData.bosses[bossID-1].value.stage}阶 ${homeData.bosses[bossID-1].value.round}回'),
-                                        Text('${NumberFormat('#,##0').format(homeData.bosses[bossID-1].value.valueC)}/${NumberFormat('#,##0').format(homeData.bosses[bossID-1].value.valueD)}'),
+                                        Text('${homeData.bosses[bossID-1].stage.value}阶 ${homeData.bosses[bossID-1].round.value}回'),
+                                        Text('${NumberFormat('#,##0').format(homeData.bosses[bossID-1].valueC.value)}/${NumberFormat('#,##0').format(homeData.bosses[bossID-1].valueD.value)}'),
                                       ],
                                     ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
-                                        Text('攻击:${homeData.bosses[bossID-1].value.attacking}'),
-                                        Text('挂树:${homeData.bosses[bossID-1].value.tree[0]==' '?0:homeData.bosses[bossID-1].value.tree.length}'),
+                                        Text('攻击:${homeData.bosses[bossID-1].attacking.value}'),
+                                        Text('挂树:${homeData.bosses[bossID-1].tree[0]==' '?0:homeData.bosses[bossID-1].tree.length}'),
                                       ],
                                     )
                                   ]

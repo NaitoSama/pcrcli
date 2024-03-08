@@ -71,13 +71,27 @@ Future<void> hiveInit() async {
 
 class HomeData extends GetxController {
   var records = <String>[].obs;
-  List<Rx<BossInfo>> bosses = [
-    BossInfo(bossID: 1).obs,
-    BossInfo(bossID: 2).obs,
-    BossInfo(bossID: 3).obs,
-    BossInfo(bossID: 4).obs,
-    BossInfo(bossID: 5).obs,
+  List<BossInfo> bosses = [
+    BossInfo(),
+    BossInfo(),
+    BossInfo(),
+    BossInfo(),
+    BossInfo(),
   ];
+    // BossInfo(bossID: 1).obs,
+    // BossInfo(bossID: 2).obs,
+    // BossInfo(bossID: 3).obs,
+    // BossInfo(bossID: 4).obs,
+    // BossInfo(bossID: 5).obs,
+
+
+  HomeData(){
+    for(int i=0;i<5;i++){
+      // BossInfo boss = BossInfo();
+      bosses[i].bossID.value = i+1;
+      // bosses[i] = boss;
+    }
+  }
   // var boss1 = BossInfo(bossID: 1).obs;
   // var boss2 = BossInfo(bossID: 2).obs;
   // var boss3 = BossInfo(bossID: 3).obs;
@@ -93,7 +107,28 @@ class HomeData extends GetxController {
     //   case 5:boss5.value = bossInfo;break;
     //   default:return false;
     // }
-    bosses[bossID - 1].value = bossInfo;
+    if(bosses[bossID - 1].stage.value != bossInfo.stage.value){
+      bosses[bossID - 1].stage.value = bossInfo.stage.value;
+    }
+    if(bosses[bossID - 1].round.value != bossInfo.round.value){
+      bosses[bossID - 1].round.value = bossInfo.round.value;
+    }
+    if(bosses[bossID - 1].valueC.value != bossInfo.valueC.value){
+      bosses[bossID - 1].valueC.value = bossInfo.valueC.value;
+    }
+    if(bosses[bossID - 1].valueD.value != bossInfo.valueD.value){
+      bosses[bossID - 1].valueD.value = bossInfo.valueD.value;
+    }
+    if(bosses[bossID - 1].attacking.value != bossInfo.attacking.value){
+      bosses[bossID - 1].stage.value = bossInfo.stage.value;
+    }
+    if(bosses[bossID - 1].tree != bossInfo.tree){
+      bosses[bossID - 1].tree = RxList<String>.from(bossInfo.tree);
+    }
+    if(bosses[bossID - 1].picETag.value != bossInfo.picETag.value){
+      bosses[bossID - 1].picETag.value = bossInfo.picETag.value;
+    }
+    // bosses[bossID - 1] = bossInfo;
     // return true;
   }
 
@@ -106,54 +141,54 @@ class HomeData extends GetxController {
 }
 
 class BossInfo {
-  int bossID = 0;
-  int stage = 0;
-  int round = 0;
-  int valueC = 0;
-  int valueD = 0;
-  List<String> tree = [' ',];
-  String attacking = ' ';
-  String picETag = '';
-  BossInfo({
-    this.bossID = 0,
-    this.stage = 0,
-    this.round = 0,
-    this.valueC = 0,
-    this.valueD = 0,
-    this.attacking = '',
-    this.tree = const [''],
-    this.picETag = '',
-  });
+  RxInt bossID = 0.obs;
+  RxInt stage = 0.obs;
+  RxInt round = 0.obs;
+  RxInt valueC = 0.obs;
+  RxInt valueD = 0.obs;
+  RxList<String> tree = [' ',].obs;
+  RxString attacking = ' '.obs;
+  RxString picETag = ''.obs;
+  // BossInfo({
+  //   this.bossID = 0.obs,
+  //   this.stage = 0.obs,
+  //   this.round = 0.obs,
+  //   this.valueC = 0.obs,
+  //   this.valueD = 0.obs,
+  //   this.attacking,
+  //   this.tree,
+  //   this.picETag,
+  // });
 }
 
-class AppState extends ChangeNotifier {
-  List<String> records = [];
-  BossInfo boss1 = BossInfo(bossID: 1);
-  BossInfo boss2 = BossInfo(bossID: 2);
-  BossInfo boss3 = BossInfo(bossID: 3);
-  BossInfo boss4 = BossInfo(bossID: 4);
-  BossInfo boss5 = BossInfo(bossID: 5);
-  bool updateBoss(BossInfo bossInfo,int bossID) {
-    switch (bossID){
-      case 1:boss1 = bossInfo;break;
-      case 2:boss2 = bossInfo;break;
-      case 3:boss3 = bossInfo;break;
-      case 4:boss4 = bossInfo;break;
-      case 5:boss5 = bossInfo;break;
-      default:return false;
-    }
-    notifyListeners();
-    return true;
-  }
-  void appendRecord(String data){
-    records.add(data);
-    notifyListeners();
-  }
-  void initRecord(List<String> data){
-    records = data;
-    notifyListeners();
-  }
-}
+// class AppState extends ChangeNotifier {
+//   List<String> records = [];
+//   BossInfo boss1 = BossInfo(bossID: 1);
+//   BossInfo boss2 = BossInfo(bossID: 2);
+//   BossInfo boss3 = BossInfo(bossID: 3);
+//   BossInfo boss4 = BossInfo(bossID: 4);
+//   BossInfo boss5 = BossInfo(bossID: 5);
+//   bool updateBoss(BossInfo bossInfo,int bossID) {
+//     switch (bossID){
+//       case 1:boss1 = bossInfo;break;
+//       case 2:boss2 = bossInfo;break;
+//       case 3:boss3 = bossInfo;break;
+//       case 4:boss4 = bossInfo;break;
+//       case 5:boss5 = bossInfo;break;
+//       default:return false;
+//     }
+//     notifyListeners();
+//     return true;
+//   }
+//   void appendRecord(String data){
+//     records.add(data);
+//     notifyListeners();
+//   }
+//   void initRecord(List<String> data){
+//     records = data;
+//     notifyListeners();
+//   }
+// }
 
 class MyApp extends StatelessWidget {
   final int routeNum;
@@ -177,9 +212,10 @@ class MyApp extends StatelessWidget {
       default:
         break;
     }
-    return ChangeNotifierProvider(
-      create: (context) => AppState(),
-      child: MaterialApp(
+    // return ChangeNotifierProvider(
+    //   create: (context) => AppState(),
+    //   child: MaterialApp(
+    return MaterialApp(
         title: 'Flutter Demo',
         builder: BotToastInit(),
         navigatorObservers: [BotToastNavigatorObserver()],
@@ -211,8 +247,7 @@ class MyApp extends StatelessWidget {
         },
         initialRoute: homePage,
         // home: home,
-      ),
-    );
+      );
   }
 }
 
