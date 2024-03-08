@@ -49,6 +49,7 @@ class GetxSettings extends GetxController {
   var appSettings = AppSettings().obs;
   Future<void> updateSettings(AppSettings newSettings) async {
     var settingsBox = Hive.box('settingsBox');
+    settingsBox.delete('settings');
     settingsBox.put('settings', newSettings);
     // appSettings.value  = newSettings;
   }

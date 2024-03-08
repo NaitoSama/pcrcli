@@ -473,6 +473,7 @@ class _bossCardState extends State<bossCard> {
       final response = await http.get(Uri.parse(bossImg));
       if (response.statusCode == 200) {
         getxSettings.appSettings.value.eTagToPic[picETag] = response.bodyBytes;
+
         getxSettings.updateSettings(getxSettings.appSettings.value);
       } else {
         throw Exception('Failed to fetch image: ${response.statusCode}');
@@ -552,7 +553,10 @@ class _bossCardState extends State<bossCard> {
                           return Container(
                               width: 80,
                               height: 80,
-                              child: CircularProgressIndicator()
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 10),
+                                child: CircularProgressIndicator(),
+                              )
                           );
                         }
                       }
