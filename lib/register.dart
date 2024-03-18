@@ -12,6 +12,7 @@ import 'package:pcrcli/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'boss.dart';
+import 'main.dart';
 
 class register extends StatefulWidget {
   const register({super.key});
@@ -118,6 +119,8 @@ class _registerState extends State<register> {
     var cancel1 = BotToast.showLoading();
     if (await sendRegisterRequest(username.text, password.text, code.text)){
       cancel1();
+      WSC wsc = Get.find<WSC>();
+      wsc.connect();
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home', // home 页面的路由名称

@@ -117,6 +117,8 @@ class _loginState extends State<login> {
     var cancel1 = BotToast.showLoading();
     if(await sendLoginRequest(username.text,password.text)){
       cancel1();
+      WSC wsc = Get.find<WSC>();
+      wsc.connect();
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home', // home 页面的路由名称

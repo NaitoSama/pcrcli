@@ -1,4 +1,5 @@
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bot_toast/bot_toast.dart';
@@ -14,21 +15,27 @@ import 'package:provider/provider.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:http/http.dart' as http;
 
 import 'boss.dart';
-import 'home.dart';
+import 'startup.dart';
 import 'login.dart';
+import 'my_page.dart';
+
+part 'init.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await hiveInit();
   var routeNum = await initState();
+  await wsInit();
   runApp(MyApp(routeNum));
 }
 
 Future<int> initState() async {
   Get.put(HomeData());
   Get.put(GetxSettings());
+  Get.put(WSC());
 
   GetxSettings getxSettings = Get.find<GetxSettings>();
   var settingsBox = Hive.box('settingsBox');
@@ -67,6 +74,15 @@ Future<void> hiveInit() async {
   }
   // AppSettings appSettings = box.get('settings');
   // print(appSettings.getIndex);
+}
+
+Future<void> wsInit() async {
+  WSC wsc = Get.find<WSC>();
+  try{
+    await wsc.connect();
+  }catch(e){
+    print(e);
+  }
 }
 
 class HomeData extends GetxController {
@@ -244,6 +260,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => login(),
           '/register': (context) => register(),
           '/home': (context) => bossPage(),
+          '/my_page': (context) => MyPage(),
         },
         initialRoute: homePage,
         // home: home,

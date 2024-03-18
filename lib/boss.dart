@@ -31,7 +31,8 @@ class bossPage extends StatefulWidget {
 class _bossPageState extends State<bossPage> {
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
-  List<int> recordsUniquenessCheck = [];
+  // List<int> recordsUniquenessCheck = [];
+  late WSC wsc;
   late WebSocketChannel ws;
   late String token;
   late String url;
@@ -46,167 +47,178 @@ class _bossPageState extends State<bossPage> {
 
 
   Future _loadPreferences() async {
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    // var settingsBox = await Hive.openBox('settingsBox');
     getxSettings = Get.find<GetxSettings>();
-    // url = prefs.getString('url') ?? '';
-    url = getxSettings.appSettings.value.remoteServerUrl;
-    // token = prefs.getString('token') ?? '';
-    token = getxSettings.appSettings.value.token;
-    ws = IOWebSocketChannel.connect(
-        '${url.replaceFirst('http', 'ws')}/v1/ws',
-        headers: {
-          HttpHeaders.cookieHeader:'pekoToken=$token'
-        }
-    );
-    ws.stream.listen((event) {
-      print(event);
-      handleWebsocketMessage(event);
-    });
-    // sendInitData();
-    await getRecords(url,token);
-  }
-
-  Future<void> getRecords(String url,String token) async {
-    var homeData = Get.find<HomeData>();
-    var headers = {'Cookie':'pekoToken=$token'};
-    var request = http.Request('GET',Uri.parse('$url/v1/records'));
-    request.headers.addAll(headers);
-    http.StreamedResponse response = await request.send();
-    var jsonString = await response.stream.bytesToString();
-    var data = jsonDecode(jsonString);
-    List<String> records = [];
-    for(Map<String,dynamic> i in data){
-      if (i['CanUndo'] != 1){
-        continue;
-      }
-      print('i: $i');
-      records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
-    }
-    // Provider.of<AppState>(context, listen: false).initRecord(records);
-    homeData.initRecord(records);
-
-    request = http.Request('GET',Uri.parse('$url/v1/bosses'));
-    request.headers.addAll(headers);
-    response = await request.send();
-    jsonString = await response.stream.bytesToString();
-    data = jsonDecode(jsonString);
-    GetxSettings getxSettings = Get.find<GetxSettings>();
-    int j = 0;
-    for(Map<String,dynamic> i in data) {
-      print('i: $i');
-      int bossID = i['ID'];
-      BossInfo boss = homeData.bosses[bossID - 1];
-      boss.stage.value = i['Stage'];
-      boss.round.value = i['Round'];
-      boss.valueC.value = i['Value'];
-      boss.valueD.value = i['ValueD'];
-      boss.attacking.value = i['WhoIsIn'];
-      boss.tree.value = (i['Tree'] as String).split('|');
-      boss.picETag.value = i['PicETag'];
-      // getxSettings.appSettings.value.bossPicETag[j++] = i['PicETag'];
-      // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
-      // homeData.updateBoss(boss, boss.bossID.value);
-    }
-    // getxSettings.updateSettings(getxSettings.appSettings.value);
-  }
-
-  void handleWebsocketMessage(dynamic message) {
-    var homeData = Get.find<HomeData>();
-    // todo 处理ws收到的数据，更新appState的boss信息并执行notifyListeners()
-    final data = jsonDecode(message);
-    if (data is List) {
-      // if (data.length < 1) {
-      //   print('data is empty');
-      //   return;
-      // }
-      // Map<String,dynamic> data1 = data[0];
-      // if (data1.containsKey('WhoIsIn')){
-      //   for(Map<String,dynamic> i in data) {
-      //     print('i: $i');
-      //     BossInfo boss = BossInfo(
-      //       bossID:i['ID'],
-      //       stage:i['Stage'],
-      //       round:i['Round'],
-      //       valueC:i['Value'],
-      //       valueD:i['ValueD'],
-      //       attacking:i['WhoIsIn'],
-      //       tree:(i['Tree'] as String).split('|'),
-      //     );
-      //     Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
-      //   }
-      // }else if (data1.containsKey('BeforeBossStage')){
-      //   List<String> records = [];
-      //   for(Map<String,dynamic> i in data){
-      //     if (i['CanUndo'] != 1){
-      //       continue;
-      //     }
-      //     records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
-      //   }
-      //   Provider.of<AppState>(context, listen: false).initRecord(records);
-      // }
-      //
-
-    }else if (data is Map){
-      if(data.containsKey('WhoIsIn')){
-        int bossID = data['ID'];
-        BossInfo boss = homeData.bosses[bossID - 1];
-        boss.stage.value = data['Stage'];
-        boss.round.value = data['Round'];
-        boss.valueC.value = data['Value'];
-        boss.valueD.value = data['ValueD'];
-        boss.attacking.value = data['WhoIsIn'];
-        boss.tree.value = (data['Tree'] as String).split('|');
-        boss.picETag.value = data['PicETag'];
-        // late BossInfo nowBoss;
-        // switch(boss.bossID){
-        //   case 1:nowBoss = homeData.boss1.value;break;
-        //   case 2:nowBoss = homeData.boss2.value;break;
-        //   case 3:nowBoss = homeData.boss3.value;break;
-        //   case 4:nowBoss = homeData.boss4.value;break;
-        //   case 5:nowBoss = homeData.boss5.value;break;
-        // }
-        // if (boss.picETag != nowBoss.picETag){
-        //
-        //   // setState(() {
-        //   // });
-        // }
-        // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
-        // homeData.updateBoss(boss,boss.bossID.value);
-      }else if (data.containsKey('BeforeBossStage')){
-        if (recordsUniquenessCheck.contains(data['ID'])){
-          return;
-        }
-        recordsUniquenessCheck.add(data['ID']);
-        // Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
-        homeData.appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
+    wsc = Get.find<WSC>();
+    while(true){
+      if (wsc.isConnected && wsc.dataInitComplete){
+        ws = wsc.ws;
+        url = wsc.url;
+        token = wsc.token;
+        break;
       }
     }
+
+    // // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // // var settingsBox = await Hive.openBox('settingsBox');
+    // getxSettings = Get.find<GetxSettings>();
+    // // url = prefs.getString('url') ?? '';
+    // url = getxSettings.appSettings.value.remoteServerUrl;
+    // // token = prefs.getString('token') ?? '';
+    // token = getxSettings.appSettings.value.token;
+    // ws = IOWebSocketChannel.connect(
+    //     '${url.replaceFirst('http', 'ws')}/v1/ws',
+    //     headers: {
+    //       HttpHeaders.cookieHeader:'pekoToken=$token'
+    //     }
+    // );
+    // ws.stream.listen((event) {
+    //   print(event);
+    //   handleWebsocketMessage(event);
+    // });
+    // // sendInitData();
+    // await getRecords(url,token);
   }
-
-  // ws发送一次获取boss状态的请求 需要已有ws和token
-  void sendInitData(){
-    Map<String,String> jsonData = {
-      'type':'getBoss',
-      'token':token,
-    };
-
-    String jsonString = jsonEncode(jsonData);
-    ws.sink.add(jsonString);
-
-    jsonData = {
-      'type':'getRecord',
-      'token':token,
-    };
-    jsonString = jsonEncode(jsonData);
-    ws.sink.add(jsonString);
-  }
-
-  void _reloadPage(){
-    setState(() {
-      counter = 0;
-    });
-  }
+  //
+  // Future<void> getRecords(String url,String token) async {
+  //   var homeData = Get.find<HomeData>();
+  //   var headers = {'Cookie':'pekoToken=$token'};
+  //   var request = http.Request('GET',Uri.parse('$url/v1/records'));
+  //   request.headers.addAll(headers);
+  //   http.StreamedResponse response = await request.send();
+  //   var jsonString = await response.stream.bytesToString();
+  //   var data = jsonDecode(jsonString);
+  //   List<String> records = [];
+  //   for(Map<String,dynamic> i in data){
+  //     if (i['CanUndo'] != 1){
+  //       continue;
+  //     }
+  //     print('i: $i');
+  //     records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
+  //   }
+  //   // Provider.of<AppState>(context, listen: false).initRecord(records);
+  //   homeData.initRecord(records);
+  //
+  //   request = http.Request('GET',Uri.parse('$url/v1/bosses'));
+  //   request.headers.addAll(headers);
+  //   response = await request.send();
+  //   jsonString = await response.stream.bytesToString();
+  //   data = jsonDecode(jsonString);
+  //   GetxSettings getxSettings = Get.find<GetxSettings>();
+  //   int j = 0;
+  //   for(Map<String,dynamic> i in data) {
+  //     print('i: $i');
+  //     int bossID = i['ID'];
+  //     BossInfo boss = homeData.bosses[bossID - 1];
+  //     boss.stage.value = i['Stage'];
+  //     boss.round.value = i['Round'];
+  //     boss.valueC.value = i['Value'];
+  //     boss.valueD.value = i['ValueD'];
+  //     boss.attacking.value = i['WhoIsIn'];
+  //     boss.tree.value = (i['Tree'] as String).split('|');
+  //     boss.picETag.value = i['PicETag'];
+  //     // getxSettings.appSettings.value.bossPicETag[j++] = i['PicETag'];
+  //     // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+  //     // homeData.updateBoss(boss, boss.bossID.value);
+  //   }
+  //   // getxSettings.updateSettings(getxSettings.appSettings.value);
+  // }
+  //
+  // void handleWebsocketMessage(dynamic message) {
+  //   var homeData = Get.find<HomeData>();
+  //   // todo 处理ws收到的数据，更新appState的boss信息并执行notifyListeners()
+  //   final data = jsonDecode(message);
+  //   if (data is List) {
+  //     // if (data.length < 1) {
+  //     //   print('data is empty');
+  //     //   return;
+  //     // }
+  //     // Map<String,dynamic> data1 = data[0];
+  //     // if (data1.containsKey('WhoIsIn')){
+  //     //   for(Map<String,dynamic> i in data) {
+  //     //     print('i: $i');
+  //     //     BossInfo boss = BossInfo(
+  //     //       bossID:i['ID'],
+  //     //       stage:i['Stage'],
+  //     //       round:i['Round'],
+  //     //       valueC:i['Value'],
+  //     //       valueD:i['ValueD'],
+  //     //       attacking:i['WhoIsIn'],
+  //     //       tree:(i['Tree'] as String).split('|'),
+  //     //     );
+  //     //     Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+  //     //   }
+  //     // }else if (data1.containsKey('BeforeBossStage')){
+  //     //   List<String> records = [];
+  //     //   for(Map<String,dynamic> i in data){
+  //     //     if (i['CanUndo'] != 1){
+  //     //       continue;
+  //     //     }
+  //     //     records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
+  //     //   }
+  //     //   Provider.of<AppState>(context, listen: false).initRecord(records);
+  //     // }
+  //     //
+  //
+  //   }else if (data is Map){
+  //     if(data.containsKey('WhoIsIn')){
+  //       int bossID = data['ID'];
+  //       BossInfo boss = homeData.bosses[bossID - 1];
+  //       boss.stage.value = data['Stage'];
+  //       boss.round.value = data['Round'];
+  //       boss.valueC.value = data['Value'];
+  //       boss.valueD.value = data['ValueD'];
+  //       boss.attacking.value = data['WhoIsIn'];
+  //       boss.tree.value = (data['Tree'] as String).split('|');
+  //       boss.picETag.value = data['PicETag'];
+  //       // late BossInfo nowBoss;
+  //       // switch(boss.bossID){
+  //       //   case 1:nowBoss = homeData.boss1.value;break;
+  //       //   case 2:nowBoss = homeData.boss2.value;break;
+  //       //   case 3:nowBoss = homeData.boss3.value;break;
+  //       //   case 4:nowBoss = homeData.boss4.value;break;
+  //       //   case 5:nowBoss = homeData.boss5.value;break;
+  //       // }
+  //       // if (boss.picETag != nowBoss.picETag){
+  //       //
+  //       //   // setState(() {
+  //       //   // });
+  //       // }
+  //       // Provider.of<AppState>(context, listen: false).updateBoss(boss,boss.bossID);
+  //       // homeData.updateBoss(boss,boss.bossID.value);
+  //     }else if (data.containsKey('BeforeBossStage')){
+  //       if (recordsUniquenessCheck.contains(data['ID'])){
+  //         return;
+  //       }
+  //       recordsUniquenessCheck.add(data['ID']);
+  //       // Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
+  //       homeData.appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
+  //     }
+  //   }
+  // }
+  //
+  // // ws发送一次获取boss状态的请求 需要已有ws和token
+  // void sendInitData(){
+  //   Map<String,String> jsonData = {
+  //     'type':'getBoss',
+  //     'token':token,
+  //   };
+  //
+  //   String jsonString = jsonEncode(jsonData);
+  //   ws.sink.add(jsonString);
+  //
+  //   jsonData = {
+  //     'type':'getRecord',
+  //     'token':token,
+  //   };
+  //   jsonString = jsonEncode(jsonData);
+  //   ws.sink.add(jsonString);
+  // }
+  //
+  // void _reloadPage(){
+  //   setState(() {
+  //     counter = 0;
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -219,10 +231,11 @@ class _bossPageState extends State<bossPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFF1F4F8),
+        backgroundColor: Color(0xFFFAFAFA),
         automaticallyImplyLeading: false,
         title: Text(
           'Clan Battle',
+          style: TextStyle(color: Colors.black),
         ),
         actions: [],
         centerTitle: false,
@@ -248,6 +261,7 @@ class _bossPageState extends State<bossPage> {
 
 
           return ListView(
+
             // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 公告栏
@@ -346,6 +360,25 @@ class _bossPageState extends State<bossPage> {
             ],
           );
         }
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home),label: 'home'),
+          BottomNavigationBarItem(icon: Icon(Icons.person),label: 'mine'),
+        ],
+        onTap: (int index){
+          switch(index){
+            case 0: {
+              if(ModalRoute.of(context)?.settings.name == '/home'){
+                break;
+              }
+              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);break;
+            }
+
+            case 1: Navigator.pushNamedAndRemoveUntil(context, '/my_page', (route) => false);break;
+          }
+        },
       ),
     );
   }
