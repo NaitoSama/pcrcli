@@ -107,8 +107,8 @@ class MyPage extends StatelessWidget {
             ],
           ),
           Container(
-            color: Color(0xFFF1F4F8),
-            child: Row(
+            color: const Color(0xFFF1F4F8),
+            child: const Row(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
@@ -127,12 +127,12 @@ class MyPage extends StatelessWidget {
           // Generated code for this Column Widget...
           Expanded(
             child: Container(
-              color: Color(0xFFF1F4F8),
+              color: const Color(0xFFF1F4F8),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(20, 0, 20, 0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 0),
                     child: SizedBox(
                       height: 54,
                       width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
@@ -149,7 +149,7 @@ class MyPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Padding(
@@ -174,7 +174,7 @@ class MyPage extends StatelessWidget {
                     )
                   ),
                   Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
                       child: SizedBox(
                         height: 54,
                         width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
@@ -191,7 +191,7 @@ class MyPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(15),
                             ),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Padding(
@@ -216,7 +216,7 @@ class MyPage extends StatelessWidget {
                       )
                   ),
                   Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 20),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 20),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -233,7 +233,6 @@ class MyPage extends StatelessWidget {
                                     (route) => false, // 移除条件，始终为 false，表示移除所有页面
                               );
                             },
-                            child: Text('登出'),
                             style: ElevatedButton.styleFrom(
                               primary: Colors.white, // 设置按钮背景颜色为白色
                               onPrimary: Colors.black, // 设置按钮文字颜色为黑色
@@ -242,6 +241,7 @@ class MyPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10), // 设置按钮圆角
                               ),
                             ),
+                            child: const Text('登出'),
                           ),
                         ),
                       ],
