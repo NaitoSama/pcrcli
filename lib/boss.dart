@@ -229,20 +229,22 @@ class _bossPageState extends State<bossPage> {
   @override
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFFFAFAFA),
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Clan Battle',
-          style: TextStyle(color: Colors.black),
-        ),
-        actions: [],
-        centerTitle: false,
-        elevation: 0,
-      ),
+    return
+      // Scaffold(
+      // appBar: AppBar(
+      //   backgroundColor: Color(0xFFFAFAFA),
+      //   automaticallyImplyLeading: false,
+      //   title: Text(
+      //     'Clan Battle',
+      //     style: TextStyle(color: Colors.black),
+      //   ),
+      //   actions: [],
+      //   centerTitle: false,
+      //   elevation: 0,
+      // ),
 
-      body: FutureBuilder(
+      // body:
+      FutureBuilder(
         future: _loadPreferences(),
         builder: (context,snapshot) {
           if (snapshot.connectionState == ConnectionState.done){
@@ -360,27 +362,27 @@ class _bossPageState extends State<bossPage> {
             ],
           );
         }
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home),label: 'home'),
-          BottomNavigationBarItem(icon: Icon(Icons.person),label: 'mine'),
-        ],
-        onTap: (int index){
-          switch(index){
-            case 0: {
-              if(ModalRoute.of(context)?.settings.name == '/home'){
-                break;
-              }
-              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);break;
-            }
-
-            case 1: Navigator.pushNamedAndRemoveUntil(context, '/my_page', (route) => false);break;
-          }
-        },
-      ),
-    );
+      );
+    //   bottomNavigationBar: BottomNavigationBar(
+    //     currentIndex: 0,
+    //     items: [
+    //       BottomNavigationBarItem(icon: Icon(Icons.home),label: 'home'),
+    //       BottomNavigationBarItem(icon: Icon(Icons.person),label: 'mine'),
+    //     ],
+    //     onTap: (int index){
+    //       switch(index){
+    //         case 0: {
+    //           if(ModalRoute.of(context)?.settings.name == '/home'){
+    //             break;
+    //           }
+    //           Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);break;
+    //         }
+    //
+    //         case 1: Navigator.pushNamedAndRemoveUntil(context, '/my_page', (route) => false);break;
+    //       }
+    //     },
+    //   ),
+    // );
   }
 }
 

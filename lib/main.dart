@@ -18,6 +18,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:http/http.dart' as http;
 
 import 'boss.dart';
+import 'home.dart';
 import 'startup.dart';
 import 'login.dart';
 import 'my_page.dart';
@@ -259,7 +260,8 @@ class MyApp extends StatelessWidget {
           '/startup': (context) => StartUp(),
           '/login': (context) => login(),
           '/register': (context) => register(),
-          '/home': (context) => bossPage(),
+          // '/home': (context) => bossPage(),
+          '/home': (context) => Home(),
           '/my_page': (context) => MyPage(),
         },
         initialRoute: homePage,
