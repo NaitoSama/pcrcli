@@ -36,7 +36,7 @@ class MyPageLogic {
   }
 
   // 选择图片
-  Future<bool> _pickImage(String url,String token) async {
+  Future<bool> pickImage(String url,String token) async {
     // final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 

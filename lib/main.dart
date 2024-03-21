@@ -167,7 +167,7 @@ class User {
 }
 
 class Record {
-  Uint8List pic = Uint8List(0);
+  String pic = '';
   String text = '';
 }
 

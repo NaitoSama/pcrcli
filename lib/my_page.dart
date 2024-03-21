@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,7 +30,7 @@ class MyPage extends StatelessWidget {
     }else{
       final response = await http.get(Uri.parse('${getx.appSettings.value.remoteServerUrl}/pic/${homeData.users[getx.appSettings.value.username]?.picEtag.value}.jpg'));
       if (response.statusCode == 200) {
-        getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]!.picEtag.value!] = response.bodyBytes;
+        getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]!.picEtag.value] = response.bodyBytes;
         getx.updateSettings(getx.appSettings.value);
         return true;
       } else {
@@ -224,8 +226,19 @@ class MyPage extends StatelessWidget {
                         height: 54,
                         width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
                         child: ElevatedButton(
-                          onPressed: () {
-                            var cancel1 = BotToast.showText(text:"功能还没做捏");
+                          onPressed: () async {
+                            bool result = await myPageLogic.pickImage(getx.appSettings.value.remoteServerUrl,getx.appSettings.value.token);
+                            if (result){
+                              var cancel1 = BotToast.showText(text:"上传成功");
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                '/home', // home 页面的路由名称
+                                    (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                              );
+                            }else{
+                              var cancel1 = BotToast.showText(text:"上传失败");
+                            }
+
                             // 按钮点击事件
                           },
                           style: ElevatedButton.styleFrom(

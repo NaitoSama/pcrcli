@@ -34,7 +34,6 @@ class _bossPageState extends State<bossPage> {
   final TextEditingController _revise = TextEditingController();
   // List<int> recordsUniquenessCheck = [];
   late WSC wsc;
-  late WebSocketChannel ws;
   late String token;
   late String url;
   // late Box<dynamic> settingsBox;
@@ -52,7 +51,6 @@ class _bossPageState extends State<bossPage> {
     wsc = Get.find<WSC>();
     while(true){
       if (wsc.isConnected && wsc.dataInitComplete){
-        ws = wsc.ws;
         url = wsc.url;
         token = wsc.token;
         break;
@@ -226,7 +224,6 @@ class _bossPageState extends State<bossPage> {
 
   @override
   void dispose() {
-    ws.sink.close();
     super.dispose();
   }
 
@@ -283,7 +280,6 @@ class _bossPageState extends State<bossPage> {
                   contentWidget: bossCMD(
                     bossID: 1,
                     token: token,
-                    ws: ws,
                   )
               );
               },
@@ -299,7 +295,6 @@ class _bossPageState extends State<bossPage> {
                           contentWidget: bossCMD(
                             bossID: 2,
                             token: token,
-                            ws: ws,
                           )
                       );
                     },
@@ -315,7 +310,6 @@ class _bossPageState extends State<bossPage> {
                           contentWidget: bossCMD(
                             bossID: 3,
                             token: token,
-                            ws: ws,
                           )
                       );
                     },
@@ -331,7 +325,6 @@ class _bossPageState extends State<bossPage> {
                           contentWidget: bossCMD(
                             bossID: 4,
                             token: token,
-                            ws: ws,
                           )
                       );
                     },
@@ -347,7 +340,7 @@ class _bossPageState extends State<bossPage> {
                           contentWidget: bossCMD(
                             bossID: 5,
                             token: token,
-                            ws: ws,
+
                           )
                       );
                     },
@@ -683,14 +676,14 @@ class bossCMDDialog extends AlertDialog {
 class bossCMD extends StatefulWidget {
   final int bossID;
   final String token;
-  final WebSocketChannel ws;
-  const bossCMD({super.key, required this.bossID, required this.token, required this.ws});
+  const bossCMD({super.key, required this.bossID, required this.token});
 
   @override
   State<bossCMD> createState() => _bossCMDState();
 }
 
 class _bossCMDState extends State<bossCMD> {
+  var wsc = Get.find<WSC>();
   final TextEditingController _damage = TextEditingController();
   final TextEditingController _revise = TextEditingController();
   GetxSettings getxSettings = Get.find<GetxSettings>();
@@ -877,7 +870,7 @@ class _bossCMDState extends State<bossCMD> {
                     "token":widget.token,
                   };
                   String jsonString = json.encode(jsonData);
-                  widget.ws.sink.add(jsonString);
+                  wsc.ws.sink.add(jsonString);
                   Navigator.of(context).pop();
                 },
               ),
@@ -908,7 +901,7 @@ class _bossCMDState extends State<bossCMD> {
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         Navigator.of(context).pop();
                       },
                       child: Text('出刀',style: TextStyle(color: Colors.black),)),
@@ -935,7 +928,8 @@ class _bossCMDState extends State<bossCMD> {
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        // widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         Navigator.of(context).pop();
                       },
                       child: Text('尾刀',style: TextStyle(color: Colors.black),)),
@@ -960,13 +954,13 @@ class _bossCMDState extends State<bossCMD> {
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         jsonData = {
                           "type":"getRecord",
                           "token":widget.token,
                         };
                         jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         Navigator.of(context).pop();
                       },
                       child: Text('撤回',style: TextStyle(color: Colors.black),)),
@@ -997,7 +991,7 @@ class _bossCMDState extends State<bossCMD> {
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         Navigator.of(context).pop();
                       },
                       child: Text('我进了',style: TextStyle(color: Colors.black),)),
@@ -1022,7 +1016,7 @@ class _bossCMDState extends State<bossCMD> {
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         Navigator.of(context).pop();
                       },
                       child: Text('我出了',style: TextStyle(color: Colors.black),)),
@@ -1053,7 +1047,7 @@ class _bossCMDState extends State<bossCMD> {
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         Navigator.of(context).pop();
                       },
                       child: Text('挂树',style: TextStyle(color: Colors.black),)),
@@ -1078,7 +1072,7 @@ class _bossCMDState extends State<bossCMD> {
                           "token":widget.token,
                         };
                         String jsonString = json.encode(jsonData);
-                        widget.ws.sink.add(jsonString);
+                        wsc.ws.sink.add(jsonString);
                         Navigator.of(context).pop();
                       },
                       child: Text('下树',style: TextStyle(color: Colors.black),)),
@@ -1158,7 +1152,7 @@ class _bossCMDState extends State<bossCMD> {
                             "token":widget.token,
                           };
                           String jsonString = json.encode(jsonData);
-                          widget.ws.sink.add(jsonString);
+                          wsc.ws.sink.add(jsonString);
                           Navigator.of(context).pop();
                         },
                         child: Text('调整',style: TextStyle(color: Colors.black),)),
@@ -1245,6 +1239,7 @@ class _recordBoardState extends State<recordBoard> {
   final ScrollController _recordCtl = ScrollController();
   late dynamic appState;
   var homeData = Get.find<HomeData>();
+  var getx = Get.find<GetxSettings>();
 
   // List<Widget> _buildRecords(){
   //   return appState.records;
@@ -1271,6 +1266,25 @@ class _recordBoardState extends State<recordBoard> {
       curve: Curves.easeOut,
     );
   }
+
+  Widget _userPic (int index) {
+    if (homeData.records[index].pic == '') {
+      return Image.asset(
+        'images/64135784.png',
+        width: 16,
+        height: 16,
+        fit: BoxFit.cover,
+      );
+    }else{
+      return Image.memory(
+        getx.appSettings.value.eTagToPic[homeData.records[index].pic]!,
+        width: 16,
+        height: 16,
+        fit: BoxFit.cover,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // appState = Provider.of<AppState>(context);
@@ -1311,37 +1325,19 @@ class _recordBoardState extends State<recordBoard> {
               itemCount: homeData.records.length,
               itemBuilder: (BuildContext context, int index){
                 // return Center(child: Text(appState.records[index]));
-                return Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Visibility(
-                          visible: homeData.records[index].pic != Uint8List(0)?false:true,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(3),
-                            child: Image.asset(
-                              'images/64135784.png',
-                              width: 16,
-                              height: 16,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: homeData.records[index].pic == Uint8List(0)?false:true,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(3),
-                            child: Image.memory(
-                                homeData.records[index].pic,
-                              width: 16,
-                              height: 16,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Text(homeData.records[index].text),
-                      ],
-                    )
+                return Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: _userPic(index),
+                      ),
+                      SizedBox(width: 2,),
+                      Text(homeData.records[index].text),
+                    ],
+                  ),
                 );
               }
             );

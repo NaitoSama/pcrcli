@@ -53,7 +53,7 @@ class WSC extends GetxController{
         recordsUniquenessCheck.add(data['ID']);
         // Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
         String? picETag = homeData.users[data['AttackFrom']]?.picEtag.value;
-        if (!getx.appSettings.value.eTagToPic.containsKey(picETag)){
+        if (!getx.appSettings.value.eTagToPic.containsKey(picETag) && picETag != ''){
           final response = await http.get(Uri.parse('$url/pic/$picETag.jpg'));
           if (response.statusCode == 200) {
             getx.appSettings.value.eTagToPic[picETag!] = response.bodyBytes;
@@ -64,7 +64,7 @@ class WSC extends GetxController{
         }
 
         Record record = Record();
-        record.pic = getx.appSettings.value.eTagToPic[picETag]!;
+        record.pic = picETag!;
         record.text = '${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!';
         homeData.appendRecord(record);
       }
@@ -122,7 +122,7 @@ class WSC extends GetxController{
         continue;
       }
       String? picETag = homeData.users[i['AttackFrom']]?.picEtag.value;
-      if (!getx.appSettings.value.eTagToPic.containsKey(picETag)){
+      if (!getx.appSettings.value.eTagToPic.containsKey(picETag) && picETag != ''){
         final response = await http.get(Uri.parse('$url/pic/$picETag.jpg'));
         if (response.statusCode == 200) {
           getx.appSettings.value.eTagToPic[picETag!] = response.bodyBytes;
@@ -133,7 +133,7 @@ class WSC extends GetxController{
       }
 
       Record record = Record();
-      record.pic = getx.appSettings.value.eTagToPic[picETag]!;
+      record.pic = picETag!;
       record.text = '${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!';
       records.add(record);
 
