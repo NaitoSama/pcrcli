@@ -56,6 +56,9 @@ class _bossPageState extends State<bossPage> {
         token = wsc.token;
         break;
       }
+      if (wsc.isConnected) print('connected');
+      if (wsc.dataInitComplete) print('data init');
+      sleep(Duration(seconds: 1));
     }
 
     // // SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -495,13 +498,6 @@ class _bossCardState extends State<bossCard> {
   // }
 
   Future<void> _loadPic() async {
-    // switch(bossID){
-    //   case 1:picETag = homeData.boss1.value.picETag;break;
-    //   case 2:picETag = homeData.boss2.value.picETag;break;
-    //   case 3:picETag = homeData.boss3.value.picETag;break;
-    //   case 4:picETag = homeData.boss4.value.picETag;break;
-    //   case 5:picETag = homeData.boss5.value.picETag;break;
-    // }
     picETag = homeData.bosses[bossID - 1].picETag.value;
     if (!getxSettings.appSettings.value.eTagToPic.containsKey(picETag)){
       final response = await http.get(Uri.parse(bossImg));

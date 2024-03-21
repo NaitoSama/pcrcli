@@ -118,7 +118,7 @@ class _loginState extends State<login> {
     if(await sendLoginRequest(username.text,password.text)){
       cancel1();
       WSC wsc = Get.find<WSC>();
-      wsc.connect();
+      await wsc.connect();
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home', // home 页面的路由名称

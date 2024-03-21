@@ -98,6 +98,13 @@ class WSC extends GetxController{
       // homeData.updateBoss(boss, boss.bossID.value);
     }
     // getxSettings.updateSettings(getxSettings.appSettings.value);
+
+    // request = http.Request('GET',Uri.parse('$url/v1/users'));
+    // request.headers.addAll(headers);
+    // response = await request.send();
+    // jsonString = await response.stream.bytesToString();
+    // data = jsonDecode(jsonString);
+
     dataInitComplete = true;
   }
 }

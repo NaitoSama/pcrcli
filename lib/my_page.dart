@@ -1,11 +1,13 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pcrcli/my_page.logic.dart';
 import 'package:pcrcli/settings.dart';
 
 class MyPage extends StatelessWidget {
   MyPage({super.key});
   var getx = Get.find<GetxSettings>();
+  var myPageLogic = MyPageLogic();
 
   void _logout(){
     getx.appSettings.value.token = '';
@@ -138,7 +140,11 @@ class MyPage extends StatelessWidget {
                       width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
                       child: ElevatedButton(
                         onPressed: () {
-                          var cancel1 = BotToast.showText(text:"功能还没做捏");
+                          showDialog(
+                            context: context,
+                            builder: (context) => _passwordChangeDialog(),
+                          );
+                          // var cancel1 = BotToast.showText(text:"功能还没做捏");
                           // 按钮点击事件
                         },
                         style: ElevatedButton.styleFrom(
@@ -274,5 +280,128 @@ class MyPage extends StatelessWidget {
       //   },
       // ),
     );
+  }
+}
+
+class _passwordChangeDialog extends StatelessWidget {
+  final FocusNode passwdFocus = FocusNode();
+  final FocusNode repasswdFocus = FocusNode();
+  final TextEditingController oldPasswordController = TextEditingController();
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController repeatPasswordController = TextEditingController();
+  var getx = Get.find<GetxSettings>();
+  var myPageLogic = MyPageLogic();
+  void _logout(){
+    getx.appSettings.value.token = '';
+    getx.appSettings.value.isLoggedIn = false;
+    AppSettings appSettings = getx.appSettings.value;
+    getx.updateSettings(appSettings);
+    getx.homeSelectedIndex.value = 0;
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('修改密码'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            onEditingComplete: (){
+              FocusScope.of(context).requestFocus(passwdFocus);
+            },
+            controller: oldPasswordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: '旧密码',
+            ),
+          ),
+          TextField(
+            onEditingComplete: (){
+              FocusScope.of(context).requestFocus(repasswdFocus);
+            },
+            focusNode: passwdFocus,
+            controller: newPasswordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: '新密码',
+            ),
+          ),
+          TextField(
+            onEditingComplete: () async {
+              String oldPassword = oldPasswordController.text;
+              String newPassword = newPasswordController.text;
+              String repeatPassword = repeatPasswordController.text;
+
+              if (newPassword == repeatPassword) {
+                // 密码一致，进行提交操作
+                bool result = await myPageLogic.changePassword(getx.appSettings.value.remoteServerUrl, getx.appSettings.value.username, getx.appSettings.value.token, oldPassword, newPassword);
+                if (result){
+                  var cancel1 = BotToast.showText(text:"更改密码成功，跳转至登录页面");
+                  _logout();
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login', // home 页面的路由名称
+                        (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                  );
+                }else{
+                  var cancel1 = BotToast.showText(text:"更改密码失败");
+                  Navigator.of(context).pop();
+                }
+
+                // Navigator.of(context).pop(); // 关闭对话框
+              } else {
+                var cancel1 = BotToast.showText(text:"重复输入新密码不一致");
+              }
+            },
+            focusNode: repasswdFocus,
+            controller: repeatPasswordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: '重复新密码',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        ElevatedButton(
+          onPressed: () async {
+            String oldPassword = oldPasswordController.text;
+            String newPassword = newPasswordController.text;
+            String repeatPassword = repeatPasswordController.text;
+
+            if (newPassword == repeatPassword) {
+              // 密码一致，进行提交操作
+              bool result = await myPageLogic.changePassword(getx.appSettings.value.remoteServerUrl, getx.appSettings.value.username, getx.appSettings.value.token, oldPassword, newPassword);
+              if (result){
+                var cancel1 = BotToast.showText(text:"更改密码成功，跳转至登录页面");
+                _logout();
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login', // home 页面的路由名称
+                      (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                );
+              }else{
+                var cancel1 = BotToast.showText(text:"更改密码失败");
+                Navigator.of(context).pop();
+              }
+
+              // Navigator.of(context).pop(); // 关闭对话框
+            } else {
+              var cancel1 = BotToast.showText(text:"重复输入新密码不一致");
+            }
+          },
+          child: Text('提交'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    // 清理控制器
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
+    repeatPasswordController.dispose();
   }
 }
