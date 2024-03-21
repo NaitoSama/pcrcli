@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +88,7 @@ Future<void> wsInit() async {
 }
 
 class HomeData extends GetxController {
-  var records = <String>[].obs;
+  var records = <Record>[].obs;
   List<BossInfo> bosses = [
     BossInfo(),
     BossInfo(),
@@ -95,6 +96,7 @@ class HomeData extends GetxController {
     BossInfo(),
     BossInfo(),
   ];
+  Map<String,User> users = {};
     // BossInfo(bossID: 1).obs,
     // BossInfo(bossID: 2).obs,
     // BossInfo(bossID: 3).obs,
@@ -149,12 +151,24 @@ class HomeData extends GetxController {
     // return true;
   }
 
-  void appendRecord(String data){
+  void appendRecord(Record data){
     records.add(data);
   }
-  void initRecord(List<String> data){
+  void initRecord(List<Record> data){
     records.value = data;
   }
+}
+
+class User {
+  RxString name = ''.obs;
+  RxString picEtag = ''.obs;
+  RxString picEtag128 = ''.obs;
+  RxInt permission = 0.obs;
+}
+
+class Record {
+  Uint8List pic = Uint8List(0);
+  String text = '';
 }
 
 class BossInfo {

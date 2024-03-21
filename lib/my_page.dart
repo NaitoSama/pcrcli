@@ -1,12 +1,15 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pcrcli/main.dart';
 import 'package:pcrcli/my_page.logic.dart';
 import 'package:pcrcli/settings.dart';
+import 'package:http/http.dart' as http;
 
 class MyPage extends StatelessWidget {
   MyPage({super.key});
   var getx = Get.find<GetxSettings>();
+  var homeData = Get.find<HomeData>();
   var myPageLogic = MyPageLogic();
 
   void _logout(){
@@ -16,6 +19,24 @@ class MyPage extends StatelessWidget {
     getx.updateSettings(appSettings);
     getx.homeSelectedIndex.value = 0;
   }
+
+  Future<bool> _userPic() async {
+    if (getx.appSettings.value.eTagToPic.containsKey(homeData.users[getx.appSettings.value.username]?.picEtag.value)){
+      return true;
+    }else if (homeData.users[getx.appSettings.value.username]?.picEtag.value == ''){
+      return false;
+    }else{
+      final response = await http.get(Uri.parse('${getx.appSettings.value.remoteServerUrl}/pic/${homeData.users[getx.appSettings.value.username]?.picEtag.value}.jpg'));
+      if (response.statusCode == 200) {
+        getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]!.picEtag.value!] = response.bodyBytes;
+        getx.updateSettings(getx.appSettings.value);
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +88,29 @@ class MyPage extends StatelessWidget {
                           padding: EdgeInsets.all(2),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(
-                              'images/64135784.png',
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
+                            child: FutureBuilder(
+                              future: _userPic(),
+                              builder: (context, snapshot){
+                                if (snapshot.connectionState == ConnectionState.done) {
+                                  if(snapshot.data == true){
+                                    return Image.memory(
+                                      getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!,
+                                      width: 16,
+                                      height: 16,
+                                      fit: BoxFit.cover,
+                                    );
+                                  }else{
+                                    return Image.asset(
+                                      'images/64135784.png',
+                                      width: 16,
+                                      height: 16,
+                                      fit: BoxFit.cover,
+                                    );
+                                  }
+                                } else {
+                                  return CircularProgressIndicator();
+                                }
+                              }
                             ),
                           ),
                         ),

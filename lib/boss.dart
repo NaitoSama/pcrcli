@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
@@ -357,7 +358,9 @@ class _bossPageState extends State<bossPage> {
                   onPressed: (){
                     // Provider.of<AppState>(context, listen: false).appendRecord('test');
                     var homeData = Get.find<HomeData>();
-                    homeData.appendRecord('test');
+                    Record record = Record();
+                    record.text = 'test';
+                    homeData.appendRecord(record);
                   },
                   child: Text('add record board test')
               ),
@@ -1289,7 +1292,7 @@ class _recordBoardState extends State<recordBoard> {
         ),
         child: Obx(
           (){
-            homeData.records.listen((List<String> newList) {
+            homeData.records.listen((List<Record> newList) {
               // 在这里执行当列表发生变化时要执行的操作
               // 例如将 ListView 拉到最下面的位置
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1308,7 +1311,38 @@ class _recordBoardState extends State<recordBoard> {
               itemCount: homeData.records.length,
               itemBuilder: (BuildContext context, int index){
                 // return Center(child: Text(appState.records[index]));
-                return Center(child: Text(homeData.records[index]));
+                return Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Visibility(
+                          visible: homeData.records[index].pic != Uint8List(0)?false:true,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: Image.asset(
+                              'images/64135784.png',
+                              width: 16,
+                              height: 16,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: homeData.records[index].pic == Uint8List(0)?false:true,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: Image.memory(
+                                homeData.records[index].pic,
+                              width: 16,
+                              height: 16,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Text(homeData.records[index].text),
+                      ],
+                    )
+                );
               }
             );
           }

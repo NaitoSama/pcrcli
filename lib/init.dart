@@ -31,7 +31,8 @@ class WSC extends GetxController{
     await _getRecords();
   }
 
-  void _handleWebsocketMessage(dynamic message) {
+  void _handleWebsocketMessage(dynamic message) async {
+    var getx = Get.find<GetxSettings>();
     var homeData = Get.find<HomeData>();
     final data = jsonDecode(message);
     if (data is Map){
@@ -51,26 +52,91 @@ class WSC extends GetxController{
         }
         recordsUniquenessCheck.add(data['ID']);
         // Provider.of<AppState>(context, listen: false).appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
-        homeData.appendRecord('${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!');
+        String? picETag = homeData.users[data['AttackFrom']]?.picEtag.value;
+        if (!getx.appSettings.value.eTagToPic.containsKey(picETag)){
+          final response = await http.get(Uri.parse('$url/pic/$picETag.jpg'));
+          if (response.statusCode == 200) {
+            getx.appSettings.value.eTagToPic[picETag!] = response.bodyBytes;
+            getx.updateSettings(getx.appSettings.value);
+          } else {
+            throw Exception('Failed to fetch image: ${response.statusCode}');
+          }
+        }
+
+        Record record = Record();
+        record.pic = getx.appSettings.value.eTagToPic[picETag]!;
+        record.text = '${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!';
+        homeData.appendRecord(record);
       }
     }
   }
 
   Future<void> _getRecords() async {
+
+    // init record
+    List<String> users = [];
     var homeData = Get.find<HomeData>();
+    var getx = Get.find<GetxSettings>();
     var headers = {'Cookie':'pekoToken=$token'};
     var request = http.Request('GET',Uri.parse('$url/v1/records'));
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
     var jsonString = await response.stream.bytesToString();
     var data = jsonDecode(jsonString);
-    List<String> records = [];
+    List<Record> records = [];
+
+    // init users
+    users.add(getx.appSettings.value.username);
     for(Map<String,dynamic> i in data){
       if (i['CanUndo'] != 1){
         continue;
       }
-      print('i: $i');
-      records.add('${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!');
+      String username = i['AttackFrom'];
+      if (!users.contains(username)){
+        users.add(username);
+      }
+    }
+    String query = '';
+    for (int index=0;index<users.length;index++){
+      query += 'users=${users[index]}';
+      if (index != users.length-1) query += '&';
+    }
+    var request2 = http.Request('GET',Uri.parse('$url/v1/users?$query'));
+    request2.headers.addAll(headers);
+    var response2 = await request2.send();
+    var jsonString2 = await response2.stream.bytesToString();
+    var data2 = jsonDecode(jsonString2);
+    for(Map<String,dynamic> i in data2){
+      User user = User();
+      user.name.value = i['Name'];
+      user.picEtag.value = i['PicETag'];
+      user.picEtag128.value = i['Pic16ETag'];
+      user.permission.value = i['Permission'];
+      homeData.users[i['Name']] = user;
+    }
+
+
+    // init records
+    for(Map<String,dynamic> i in data){
+      if (i['CanUndo'] != 1){
+        continue;
+      }
+      String? picETag = homeData.users[i['AttackFrom']]?.picEtag.value;
+      if (!getx.appSettings.value.eTagToPic.containsKey(picETag)){
+        final response = await http.get(Uri.parse('$url/pic/$picETag.jpg'));
+        if (response.statusCode == 200) {
+          getx.appSettings.value.eTagToPic[picETag!] = response.bodyBytes;
+          getx.updateSettings(getx.appSettings.value);
+        } else {
+          throw Exception('Failed to fetch image: ${response.statusCode}');
+        }
+      }
+
+      Record record = Record();
+      record.pic = getx.appSettings.value.eTagToPic[picETag]!;
+      record.text = '${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!';
+      records.add(record);
+
     }
     // Provider.of<AppState>(context, listen: false).initRecord(records);
     homeData.initRecord(records);
