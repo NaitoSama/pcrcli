@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pcrcli/main.dart';
+import 'package:pcrcli/settings.dart';
 
 import 'common.dart';
 
@@ -136,6 +139,25 @@ class MyPageLogic {
     } else {
       // 上传失败
       return false;
+    }
+  }
+
+  Future<void> updateMyPic () async {
+    var homeData = Get.find<HomeData>();
+    var getx = Get.find<GetxSettings>();
+    var headers = {'Cookie':'pekoToken=${getx.appSettings.value.token}'};
+    var request2 = http.Request('GET',Uri.parse('${getx.appSettings.value.remoteServerUrl}/v1/users?users=${getx.appSettings.value.username}'));
+    request2.headers.addAll(headers);
+    var response2 = await request2.send();
+    var jsonString2 = await response2.stream.bytesToString();
+    var data2 = jsonDecode(jsonString2);
+    for(Map<String,dynamic> i in data2){
+      User user = User();
+      user.name.value = i['Name'];
+      user.picEtag.value = i['PicETag'];
+      user.picEtag128.value = i['Pic16ETag'];
+      user.permission.value = i['Permission'];
+      homeData.users[i['Name']] = user;
     }
   }
 

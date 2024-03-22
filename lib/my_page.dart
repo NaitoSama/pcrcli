@@ -230,6 +230,7 @@ class MyPage extends StatelessWidget {
                             bool result = await myPageLogic.pickImage(getx.appSettings.value.remoteServerUrl,getx.appSettings.value.token);
                             if (result){
                               var cancel1 = BotToast.showText(text:"上传成功");
+                              await myPageLogic.updateMyPic();
                               Navigator.pushNamedAndRemoveUntil(
                                 context,
                                 '/home', // home 页面的路由名称
