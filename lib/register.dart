@@ -120,7 +120,7 @@ class _registerState extends State<register> {
     if (await sendRegisterRequest(username.text, password.text, code.text)){
       cancel1();
       WSC wsc = Get.find<WSC>();
-      wsc.connect();
+      await wsc.connect();
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home', // home 页面的路由名称
