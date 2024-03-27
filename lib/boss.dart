@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pcrcli/common.dart';
 import 'package:pcrcli/global.dart';
 import 'package:pcrcli/main.dart';
+import 'package:pcrcli/records.dart';
 import 'package:pcrcli/settings.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -268,7 +269,15 @@ class _bossPageState extends State<bossPage> {
             // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 公告栏
-              recordBoard(),
+              GestureDetector(
+                onTap: (){
+                  Navigator.pushNamed(
+                    context,
+                    '/records',
+                  );
+                },
+                child: recordBoard()
+              ),
               // Boss 状态格子
 
               GestureDetector (
@@ -347,15 +356,18 @@ class _bossPageState extends State<bossPage> {
                   ),
                   child: bossCard(bossID: 5,bossImg: '$url/pic/5.jpg',url: url,)
               ),
-              ElevatedButton(
-                  onPressed: (){
-                    // Provider.of<AppState>(context, listen: false).appendRecord('test');
-                    var homeData = Get.find<HomeData>();
-                    Record record = Record();
-                    record.text = 'test';
-                    homeData.appendRecord(record);
-                  },
-                  child: Text('add record board test')
+              Visibility(
+                visible: debugMode,
+                child: ElevatedButton(
+                    onPressed: (){
+                      // Provider.of<AppState>(context, listen: false).appendRecord('test');
+                      var homeData = Get.find<HomeData>();
+                      Record record = Record();
+                      record.text = 'test';
+                      homeData.appendRecord(record);
+                    },
+                    child: Text('add record board test')
+                ),
               ),
               Visibility(visible: debugMode, child: Text('${getxSettings.appSettings.value.remoteServerUrl},${getxSettings.appSettings.value.username}${getxSettings.appSettings.value.authority},${getxSettings.appSettings.value.token}')),
             ],

@@ -29,6 +29,7 @@ class _registerState extends State<register> {
   FocusNode focusNode2 = FocusNode();
 
   Future<bool> sendRegisterRequest(String username, String password, String code) async {
+    if(username == '未选择'){return false;}
     // final prefs = await SharedPreferences.getInstance();
     // var uri = prefs.getString('url');
     GetxSettings getxSettings = Get.find<GetxSettings>();

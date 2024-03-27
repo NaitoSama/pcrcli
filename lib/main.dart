@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pcrcli/global.dart';
+import 'package:pcrcli/records.dart';
 import 'package:pcrcli/register.dart';
 import 'package:pcrcli/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -169,6 +170,13 @@ class User {
 class Record {
   String pic = '';
   String text = '';
+  int id = 0;
+  String createTime = '';
+  String attackFrom = '';
+  int attackTo = 0;
+  int damage = 0;
+  int canUndo = 0;
+  bool visible = true;
 }
 
 class BossInfo {
@@ -277,6 +285,7 @@ class MyApp extends StatelessWidget {
           // '/home': (context) => bossPage(),
           '/home': (context) => Home(),
           '/my_page': (context) => MyPage(),
+          '/records': (context) => RecordsPage(),
         },
         initialRoute: homePage,
         // home: home,

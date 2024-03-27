@@ -66,6 +66,11 @@ class WSC extends GetxController{
         Record record = Record();
         record.pic = picETag!;
         record.text = '${data['AttackFrom']}对boss${data['AttackTo']}造成了${data['Damage']}点伤害!';
+        record.id = data['ID'];
+        record.createTime = data['CreatedAt'];
+        record.attackFrom = data['AttackFrom'];
+        record.attackTo = data['AttackTo'];
+        record.canUndo = data['CanUndo'];
         homeData.appendRecord(record);
       }
     }
@@ -135,6 +140,11 @@ class WSC extends GetxController{
       Record record = Record();
       record.pic = picETag!;
       record.text = '${i['AttackFrom']}对boss${i['AttackTo']}造成了${i['Damage']}点伤害!';
+      record.id = i['ID'];
+      record.createTime = i['CreatedAt'];
+      record.attackFrom = i['AttackFrom'];
+      record.attackTo = i['AttackTo'];
+      record.canUndo = i['CanUndo'];
       records.add(record);
 
     }
