@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/settings.dart';
 
@@ -9,7 +10,7 @@ class RecordsPage extends StatelessWidget {
   var homeData = Get.find<HomeData>();
   late recordsController recordsC;
   var bossList = ['1','2','3','4','5','未选择'];
-  var userList = <String>['未选择'];
+  var userList = <String>['未选择','很长的名字很长的名字很长的名字很长的名字很长的名字'];
   late int visibleCount;
 
   List<String> _bossOrUserList() {
@@ -50,50 +51,66 @@ class RecordsPage extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(10.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text('Filter:'),
-                DropdownButton<String>(
-                  value: recordsC.method.value==''?'all':recordsC.method.value,
-                  onChanged: (String? newValue) {
-                    recordsC.method.value = newValue!;
-                    recordsC.selected.value = '未选择';
-                  },
-                  items: <String>['bossid', 'username','all']
-                      .map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                // Text('筛选:'),
+                Container(
+                  width: 94,
+                  child: DropdownButton<String>(
+                    value: recordsC.method.value==''?'all':recordsC.method.value,
+                    onChanged: (String? newValue) {
+                      recordsC.method.value = newValue!;
+                      recordsC.selected.value = '未选择';
+                    },
+                    items: <String>['bossid', 'username','all']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Center(
+                          child: Text(
+                            value,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
                 // 选择关键词内容的下拉菜单
-                DropdownButton<String>(
-                  value: recordsC.selected.value,
-                  onChanged: (String? newValue) {
-                    recordsC.selected.value = newValue!;
-                  },
-                  items: _bossOrUserList()
-                      .map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                Container(
+                  width: 100,
+                  child: DropdownButton<String>(
+                    value: recordsC.selected.value,
+                    onChanged: (String? newValue) {
+                      recordsC.selected.value = newValue!;
+                    },
+                    items: _bossOrUserList()
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Container(width: 100,child: Text(value,overflow: TextOverflow.ellipsis,)),
+                      );
+                    }).toList(),
+                  ),
                 ),
                 Container(
                   padding: EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text('Sort by:'),
+                      // Text('Sort by:'),
                       IconButton(
                         icon: Icon(Icons.sort),
                         onPressed: () {
                           recordsC.asc.value = !recordsC.asc.value;
                         },
                       ),
-                      Text('${recordsC.asc.value}')
+                      TextButton(
+                        child: Text('时间${recordsC.asc.value==false?'逆':'正'}序',),
+
+                        onPressed: (){
+                          recordsC.asc.value = !recordsC.asc.value;
+                        },
+                      )
                     ],
                   ),
                 ),
@@ -118,7 +135,12 @@ class RecordsPage extends StatelessWidget {
                   }
                 }else if(recordsC.records[index].canUndo == 0){return const SizedBox.shrink();}
 
-                return recordsCard(username: recordsC.records[i].attackFrom, bossID: recordsC.records[i].attackTo);
+                return recordsCard(
+                  username: recordsC.records[i].attackFrom,
+                  bossID: recordsC.records[i].attackTo,
+                  time: recordsC.records[i].createTime,
+                  damage: recordsC.records[i].damage,
+                );
               },
             ),
           )),
@@ -131,9 +153,18 @@ class RecordsPage extends StatelessWidget {
 class recordsCard extends StatelessWidget {
   String username;
   int bossID;
+  String time;
+  int damage;
   var homeData = Get.find<HomeData>();
   var getx = Get.find<GetxSettings>();
-  recordsCard({super.key,required this.username,required this.bossID});
+  recordsCard({super.key,required this.username,required this.bossID,required this.time,required this.damage});
+
+  String _parse_time(String time) {
+    DateTime dateTime = DateTime.parse(time);
+    DateTime utcPlus8DateTime = dateTime.toUtc().add(Duration(hours: 8));
+    String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus8DateTime);
+    return formattedDateTime;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +215,7 @@ class recordsCard extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text('时间',
+                      Text(_parse_time(time),
                         style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
                       ),
                       SvgPicture.asset(
@@ -192,7 +223,7 @@ class recordsCard extends StatelessWidget {
                         width: 25,
                         height: MediaQuery.of(context).size.height*0.04,
                       ),
-                      Text('伤害',
+                      Text(NumberFormat('#,##0').format(damage),
                         style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -228,7 +259,7 @@ class recordsCard extends StatelessWidget {
 class recordsController extends GetxController {
   RxString method = ''.obs;
   RxString selected = '未选择'.obs;
-  RxBool asc = true.obs;
+  RxBool asc = false.obs;
   RxList<Record> records = <Record>[].obs;
 }
 

@@ -1347,7 +1347,9 @@ class _recordBoardState extends State<recordBoard> {
                         child: _userPic(index),
                       ),
                       SizedBox(width: 2,),
-                      Text(homeData.records[index].text),
+                      homeData.records[index].text.length >20
+                          ?Center(child: Expanded(child: Text(homeData.records[index].text,style: TextStyle(fontSize: 12),)))
+                          :Text(homeData.records[index].text),
                     ],
                   ),
                 );
