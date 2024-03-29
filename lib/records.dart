@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -118,7 +119,7 @@ class RecordsPage extends StatelessWidget {
             ),
           ),
           // 记录列表
-          Obx(() =>Expanded(
+          Expanded(
             child: ListView.builder(
               itemCount: recordsC.records.length,
               itemBuilder: (context, index) {
@@ -143,7 +144,7 @@ class RecordsPage extends StatelessWidget {
                 );
               },
             ),
-          )),
+          ),
         ],
       )),
     );
@@ -175,7 +176,7 @@ class recordsCard extends StatelessWidget {
           width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
           child: ElevatedButton(
             onPressed: () {
-
+              var cancel1 = BotToast.showText(text:username);
             },
             style: ElevatedButton.styleFrom(
               primary: Colors.white,

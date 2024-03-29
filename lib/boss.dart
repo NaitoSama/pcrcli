@@ -1348,7 +1348,7 @@ class _recordBoardState extends State<recordBoard> {
                       ),
                       SizedBox(width: 2,),
                       homeData.records[index].text.length >20
-                          ?Center(child: Expanded(child: Text(homeData.records[index].text,style: TextStyle(fontSize: 12),)))
+                          ?Text(homeData.records[index].text,style: TextStyle(fontSize: 12),)
                           :Text(homeData.records[index].text),
                     ],
                   ),
