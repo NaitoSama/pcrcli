@@ -124,7 +124,7 @@ class MyPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              Characters(getx.appSettings.value.username).length>7?'${Characters(getx.appSettings.value.username).take(7)}...':getx.appSettings.value.username,
+                              Characters(getx.appSettings.value.username).length>14?'${Characters(getx.appSettings.value.username).take(14)}...':getx.appSettings.value.username,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,

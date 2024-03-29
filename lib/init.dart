@@ -65,7 +65,7 @@ class WSC extends GetxController{
 
         Record record = Record();
         record.pic = picETag!;
-        String name = Characters(data['AttackFrom']).length > 6 ? '${Characters(data['AttackFrom']).take(6)}...' : data['AttackFrom'];
+        String name = Characters(data['AttackFrom']).length > 16 ? '${Characters(data['AttackFrom']).take(16)}...' : data['AttackFrom'];
         late String damage;
         if(data['Damage']>=10000&&data['Damage']<100000000){damage = '${data['Damage']~/10000}万';}else if(data['Damage']>=100000000){damage = '${data['Damage']~/1000000/100}亿';}else{damage = '${data['Damage']}';}
         record.text = '$name对boss${data['AttackTo']}造成了$damage伤害!';
@@ -143,7 +143,7 @@ class WSC extends GetxController{
 
       Record record = Record();
       record.pic = picETag!;
-      String name = Characters(i['AttackFrom']).length > 6 ? '${Characters(i['AttackFrom']).take(6)}...' : i['AttackFrom'];
+      String name = Characters(i['AttackFrom']).length > 16 ? '${Characters(i['AttackFrom']).take(16)}...' : i['AttackFrom'];
       late String damage;
       if(i['Damage']>=10000&&i['Damage']<100000000){damage = '${i['Damage']~/10000}万';}else if(i['Damage']>=100000000){damage = '${i['Damage']~/1000000/100}亿';}else{damage = '${i['Damage']}';}
       record.text = '$name对boss${i['AttackTo']}造成了$damage伤害!';
