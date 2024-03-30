@@ -442,6 +442,16 @@ class _bossCardState extends State<bossCard> {
   var homeData = Get.find<HomeData>();
   var getxSettings = Get.find<GetxSettings>();
 
+  Widget _userIn(String username){
+    String name = Characters(username).length>10?'${Characters(username).take(10)}...':username;
+    return Row(
+      children: [
+        const Text('攻击:'),
+        Text(name,style: const TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
+      ],
+    );
+  }
+
   // 选择图片
   // Future<void> _pickImage(int bossID) async {
   //   final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
@@ -653,7 +663,7 @@ class _bossCardState extends State<bossCard> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
-                                        Text('攻击:${homeData.bosses[bossID-1].attacking.value}'),
+                                        _userIn(homeData.bosses[bossID-1].attacking.value),
                                         Text('挂树:${homeData.bosses[bossID-1].tree[0]==' '?0:homeData.bosses[bossID-1].tree.length}'),
                                       ],
                                     )
