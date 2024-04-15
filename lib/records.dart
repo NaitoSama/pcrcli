@@ -1,5 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +12,7 @@ class RecordsPage extends StatelessWidget {
   var homeData = Get.find<HomeData>();
   late recordsController recordsC;
   var bossList = ['1','2','3','4','5','未选择'];
-  var userList = <String>['未选择','很长的名字很长的名字很长的名字很长的名字很长的名字'];
+  var userList = <String>['未选择'];
   late int visibleCount;
 
   List<String> _bossOrUserList() {
@@ -176,7 +177,8 @@ class recordsCard extends StatelessWidget {
           width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
           child: ElevatedButton(
             onPressed: () {
-              var cancel1 = BotToast.showText(text:username);
+              Clipboard.setData(ClipboardData(text:username));
+              var cancel1 = BotToast.showText(text:'已复制：$username');
             },
             style: ElevatedButton.styleFrom(
               primary: Colors.white,

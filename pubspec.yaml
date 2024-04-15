@@ -53,6 +53,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   marquee: ^2.2.3
   characters: ^1.3.0
+  clipboard: ^0.1.3
 
 dev_dependencies:
   flutter_test:

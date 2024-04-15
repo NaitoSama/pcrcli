@@ -133,7 +133,7 @@ class MyPage extends StatelessWidget {
                             Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
                               child: Obx(() => Text(
-                                '用户级别: ${(getx.appSettings.value.authority == 0)?'普通用户':'管理员'}',
+                                '用户级别: ${(getx.appSettings.value.authority == 0)?'普通用户':((getx.appSettings.value.authority == 1)?'管理员':'超级管理员')}',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
@@ -275,6 +275,55 @@ class MyPage extends StatelessWidget {
                       )
                   ),
                   Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
+                      child: Visibility(
+                        visible: (getx.appSettings.value.authority>1),
+                        child: SizedBox(
+                          height: 54,
+                          width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => _passwordChangeDialog(),
+                              );
+                              // var cancel1 = BotToast.showText(text:"功能还没做捏");
+                              // 按钮点击事件
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.white,
+                              onPrimary: Colors.black,
+                              elevation: 5,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(left: 2,bottom: 0),
+                                  child: Text(
+                                    '修改密码',
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 2),
+                                  child: Icon(Icons.keyboard_arrow_right),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                  ),
+                  Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 20),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
@@ -285,11 +334,34 @@ class MyPage extends StatelessWidget {
                           height: 37,
                           child: ElevatedButton(
                             onPressed: (){
-                              _logout();
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/login', // home 页面的路由名称
-                                    (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('登出确认'),
+                                    content: Text('你确定要登出吗？'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('不了'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          _logout();
+                                          Navigator.of(context).pop();
+                                          Navigator.pushNamedAndRemoveUntil(
+                                            context,
+                                            '/login', // home 页面的路由名称
+                                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                                          );
+                                        },
+                                        child: Text('确定'),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             },
                             style: ElevatedButton.styleFrom(
