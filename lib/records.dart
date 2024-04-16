@@ -1,6 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -142,6 +143,7 @@ class RecordsPage extends StatelessWidget {
                   bossID: recordsC.records[i].attackTo,
                   time: recordsC.records[i].createTime,
                   damage: recordsC.records[i].damage,
+                  id: recordsC.records[i].id,
                 );
               },
             ),
@@ -157,9 +159,10 @@ class recordsCard extends StatelessWidget {
   int bossID;
   String time;
   int damage;
+  int id;
   var homeData = Get.find<HomeData>();
   var getx = Get.find<GetxSettings>();
-  recordsCard({super.key,required this.username,required this.bossID,required this.time,required this.damage});
+  recordsCard({super.key,required this.username,required this.bossID,required this.time,required this.damage,required this.id});
 
   String _parse_time(String time) {
     DateTime dateTime = DateTime.parse(time);
@@ -175,82 +178,100 @@ class recordsCard extends StatelessWidget {
         child: SizedBox(
           height: MediaQuery.of(context).size.height*0.1,
           width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
-          child: ElevatedButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text:username));
-              var cancel1 = BotToast.showText(text:'已复制：$username');
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.white,
-              onPrimary: Colors.black,
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Slidable(
+            enabled: (getx.appSettings.value.authority>0),
+            // key: const ValueKey(0),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              // dismissible: DismissiblePane(key: key,onDismissed: (){},),
               children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 2,bottom: 0),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.height*0.07,
-                    height: MediaQuery.of(context).size.height*0.07,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: homeData.users[username]?.picEtag.value==''?Image.asset(
-                            'images/64135784.png',
-                            fit: BoxFit.cover,
-                          ):Image.memory(
-                              getx.appSettings.value.eTagToPic[homeData.users[username]?.picEtag.value]!,
-                              fit: BoxFit.cover,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 4,bottom: 4),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(_parse_time(time),
-                        style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
-                      ),
-                      SvgPicture.asset(
-                        'images/swords.svg',
-                        width: 25,
-                        height: MediaQuery.of(context).size.height*0.04,
-                      ),
-                      Text(NumberFormat('#,##0').format(damage),
-                        style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(right: 2,bottom: 0),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.height*0.07,
-                    height: MediaQuery.of(context).size.height*0.07,
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.memory(
-                            getx.appSettings.value.eTagToPic[homeData.bosses[bossID-1].picETag]!,
-                            fit: BoxFit.cover,
-                          )
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                SlidableAction(
+                  borderRadius: BorderRadius.circular(15),
+                  onPressed: (_){},
+                  backgroundColor: const Color(0xFFFE4A49),
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'Delete',
+                )
               ],
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text:username));
+                var cancel1 = BotToast.showText(text:'已复制：$username');
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.white,
+                onPrimary: Colors.black,
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 2,bottom: 0),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.height*0.07,
+                      height: MediaQuery.of(context).size.height*0.07,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: homeData.users[username]?.picEtag.value==''?Image.asset(
+                              'images/64135784.png',
+                              fit: BoxFit.cover,
+                            ):Image.memory(
+                                getx.appSettings.value.eTagToPic[homeData.users[username]?.picEtag.value]!,
+                                fit: BoxFit.cover,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4,bottom: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(_parse_time(time),
+                          style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
+                        ),
+                        SvgPicture.asset(
+                          'images/swords.svg',
+                          width: 25,
+                          height: MediaQuery.of(context).size.height*0.04,
+                        ),
+                        Text(NumberFormat('#,##0').format(damage),
+                          style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: 2,bottom: 0),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.height*0.07,
+                      height: MediaQuery.of(context).size.height*0.07,
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.memory(
+                              getx.appSettings.value.eTagToPic[homeData.bosses[bossID-1].picETag]!,
+                              fit: BoxFit.cover,
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         )

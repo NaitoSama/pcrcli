@@ -87,83 +87,109 @@ class WSC extends GetxController{
     var homeData = Get.find<HomeData>();
     var getx = Get.find<GetxSettings>();
     var headers = {'Cookie':'pekoToken=$token'};
+
     var request = http.Request('GET',Uri.parse('$url/v1/records'));
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
-    var jsonString = await response.stream.bytesToString();
-    var data = jsonDecode(jsonString);
-    List<Record> records = [];
-
-    // init users
-    users.add(getx.appSettings.value.username);
-    for(Map<String,dynamic> i in data){
-      if (i['CanUndo'] != 1){
-        continue;
-      }
-      String username = i['AttackFrom'];
-      if (!users.contains(username)){
-        users.add(username);
-      }
-    }
-    String query = '';
-    for (int index=0;index<users.length;index++){
-      query += 'users=${users[index]}';
-      if (index != users.length-1) query += '&';
-    }
-    var request2 = http.Request('GET',Uri.parse('$url/v1/users?$query'));
-    request2.headers.addAll(headers);
-    var response2 = await request2.send();
-    var jsonString2 = await response2.stream.bytesToString();
-    var data2 = jsonDecode(jsonString2);
-    for(Map<String,dynamic> i in data2){
-      User user = User();
-      user.name.value = i['Name'];
-      user.picEtag.value = i['PicETag'];
-      user.picEtag128.value = i['Pic16ETag'];
-      user.permission.value = i['Permission'];
-      homeData.users[i['Name']] = user;
-    }
 
 
-    // init records
-    for(Map<String,dynamic> i in data){
-      if (i['CanUndo'] != 1){
-        continue;
-      }
-      String? picETag = homeData.users[i['AttackFrom']]?.picEtag.value;
-      if (!getx.appSettings.value.eTagToPic.containsKey(picETag) && picETag != ''){
-        final response = await http.get(Uri.parse('$url/pic/$picETag.jpg'));
-        if (response.statusCode == 200) {
-          getx.appSettings.value.eTagToPic[picETag!] = response.bodyBytes;
-          getx.updateSettings(getx.appSettings.value);
-        } else {
-          throw Exception('Failed to fetch image: ${response.statusCode}');
+    if (response.contentLength! > 4){
+      var jsonString = await response.stream.bytesToString();
+      var data = jsonDecode(jsonString);
+      List<Record> records = [];
+
+      // init users
+      users.add(getx.appSettings.value.username);
+      for (Map<String, dynamic> i in data) {
+        if (i['CanUndo'] != 1) {
+          continue;
+        }
+        String username = i['AttackFrom'];
+        if (!users.contains(username)) {
+          users.add(username);
         }
       }
+      String query = '';
+      for (int index = 0; index < users.length; index++) {
+        query += 'users=${users[index]}';
+        if (index != users.length - 1) query += '&';
+      }
+      var request2 = http.Request('GET', Uri.parse('$url/v1/users?$query'));
+      request2.headers.addAll(headers);
+      var response2 = await request2.send();
+      var jsonString2 = await response2.stream.bytesToString();
+      var data2 = jsonDecode(jsonString2);
+      for (Map<String, dynamic> i in data2) {
+        User user = User();
+        user.name.value = i['Name'];
+        user.picEtag.value = i['PicETag'];
+        user.picEtag128.value = i['Pic16ETag'];
+        user.permission.value = i['Permission'];
+        homeData.users[i['Name']] = user;
+      }
 
-      Record record = Record();
-      record.pic = picETag!;
-      String name = Characters(i['AttackFrom']).length > 16 ? '${Characters(i['AttackFrom']).take(16)}...' : i['AttackFrom'];
-      late String damage;
-      if(i['Damage']>=10000&&i['Damage']<100000000){damage = '${i['Damage']~/10000}万';}else if(i['Damage']>=100000000){damage = '${i['Damage']~/1000000/100}亿';}else{damage = '${i['Damage']}';}
-      record.text = '$name对boss${i['AttackTo']}造成了$damage伤害!';
-      record.id = i['ID'];
-      record.createTime = i['CreatedAt'];
-      record.attackFrom = i['AttackFrom'];
-      record.attackTo = i['AttackTo'];
-      record.canUndo = i['CanUndo'];
-      record.damage = i['Damage'];
-      records.add(record);
+      // init records
+      for (Map<String, dynamic> i in data) {
+        if (i['CanUndo'] != 1) {
+          continue;
+        }
+        String? picETag = homeData.users[i['AttackFrom']]?.picEtag.value;
+        if (!getx.appSettings.value.eTagToPic.containsKey(picETag) &&
+            picETag != '') {
+          final response = await http.get(Uri.parse('$url/pic/$picETag.jpg'));
+          if (response.statusCode == 200) {
+            getx.appSettings.value.eTagToPic[picETag!] = response.bodyBytes;
+            getx.updateSettings(getx.appSettings.value);
+          } else {
+            throw Exception('Failed to fetch image: ${response.statusCode}');
+          }
+        }
 
+        Record record = Record();
+        record.pic = picETag!;
+        String name = Characters(i['AttackFrom']).length > 16
+            ? '${Characters(i['AttackFrom']).take(16)}...'
+            : i['AttackFrom'];
+        late String damage;
+        if (i['Damage'] >= 10000 && i['Damage'] < 100000000) {
+          damage = '${i['Damage'] ~/ 10000}万';
+        } else if (i['Damage'] >= 100000000) {
+          damage = '${i['Damage'] ~/ 1000000 / 100}亿';
+        } else {
+          damage = '${i['Damage']}';
+        }
+        record.text = '$name对boss${i['AttackTo']}造成了$damage伤害!';
+        record.id = i['ID'];
+        record.createTime = i['CreatedAt'];
+        record.attackFrom = i['AttackFrom'];
+        record.attackTo = i['AttackTo'];
+        record.canUndo = i['CanUndo'];
+        record.damage = i['Damage'];
+        records.add(record);
+      }
+      // Provider.of<AppState>(context, listen: false).initRecord(records);
+      homeData.initRecord(records);
+    }else{
+      var request2 = http.Request('GET', Uri.parse('$url/v1/users?users=${getx.appSettings.value.username}'));
+      request2.headers.addAll(headers);
+      var response2 = await request2.send();
+      var jsonString2 = await response2.stream.bytesToString();
+      var data2 = jsonDecode(jsonString2);
+      for (Map<String, dynamic> i in data2) {
+        User user = User();
+        user.name.value = i['Name'];
+        user.picEtag.value = i['PicETag'];
+        user.picEtag128.value = i['Pic16ETag'];
+        user.permission.value = i['Permission'];
+        homeData.users[i['Name']] = user;
+      }
     }
-    // Provider.of<AppState>(context, listen: false).initRecord(records);
-    homeData.initRecord(records);
 
     request = http.Request('GET',Uri.parse('$url/v1/bosses'));
     request.headers.addAll(headers);
     response = await request.send();
-    jsonString = await response.stream.bytesToString();
-    data = jsonDecode(jsonString);
+    var jsonString = await response.stream.bytesToString();
+    var data = jsonDecode(jsonString);
     GetxSettings getxSettings = Get.find<GetxSettings>();
     int j = 0;
     for(Map<String,dynamic> i in data) {

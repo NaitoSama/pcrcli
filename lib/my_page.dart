@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pcrcli/common.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/my_page.logic.dart';
 import 'package:pcrcli/settings.dart';
@@ -13,6 +14,7 @@ class MyPage extends StatelessWidget {
   var getx = Get.find<GetxSettings>();
   var homeData = Get.find<HomeData>();
   var myPageLogic = MyPageLogic();
+  final TextEditingController archiveNameController = TextEditingController();
 
   void _logout(){
     getx.appSettings.value.token = '';
@@ -282,13 +284,60 @@ class MyPage extends StatelessWidget {
                           height: 54,
                           width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: (){
                               showDialog(
                                 context: context,
-                                builder: (context) => _passwordChangeDialog(),
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20)
+                                    ),
+                                    elevation: 10,
+                                    title: Text('归档确认'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextField(
+                                          controller: archiveNameController,
+                                          decoration: const InputDecoration(
+                                            labelText: '记录归档的档案名称',
+                                          ),
+                                        ),
+                                        const Padding(
+                                          padding: EdgeInsets.only(top: 20),
+                                          child: Text('你确定要将记录归档并重置会战吗？\n该操作无法撤销！'),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 10),
+                                        child: TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('不了'),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 10,right: 8),
+                                        child: TextButton(
+                                          onPressed: () async {
+                                            var sendReq = SendReq(1, '${getx.appSettings.value.remoteServerUrl}/v1/archiverecords',query: <String,String>{'archive_name':archiveNameController.text},token: getx.appSettings.value.token);
+                                            var resp = await sendReq.send();
+                                            if(resp?.statusCode == 200){
+                                              var cancel1 = BotToast.showText(text:"重置完成，重启app查看");
+                                            }else{
+                                              var cancel1 = BotToast.showText(text:"重置失败");
+                                            }
+                                          },
+                                          child: Text('确定'),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
-                              // var cancel1 = BotToast.showText(text:"功能还没做捏");
-                              // 按钮点击事件
                             },
                             style: ElevatedButton.styleFrom(
                               primary: Colors.white,
@@ -304,7 +353,7 @@ class MyPage extends StatelessWidget {
                                 Padding(
                                   padding: EdgeInsets.only(left: 2,bottom: 0),
                                   child: Text(
-                                    '修改密码',
+                                    '归档记录并重置会战',
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
                                       fontSize: 14,
@@ -338,26 +387,36 @@ class MyPage extends StatelessWidget {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20)
+                                    ),
+                                    elevation: 10,
                                     title: Text('登出确认'),
                                     content: Text('你确定要登出吗？'),
                                     actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('不了'),
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 10),
+                                        child: TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('不了'),
+                                        ),
                                       ),
-                                      TextButton(
-                                        onPressed: () {
-                                          _logout();
-                                          Navigator.of(context).pop();
-                                          Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            '/login', // home 页面的路由名称
-                                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
-                                          );
-                                        },
-                                        child: Text('确定'),
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 10,right: 8),
+                                        child: TextButton(
+                                          onPressed: () {
+                                            _logout();
+                                            Navigator.of(context).pop();
+                                            Navigator.pushNamedAndRemoveUntil(
+                                              context,
+                                              '/login', // home 页面的路由名称
+                                                  (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                                            );
+                                          },
+                                          child: Text('确定'),
+                                        ),
                                       ),
                                     ],
                                   );
@@ -427,6 +486,10 @@ class _passwordChangeDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      elevation: 10,
       title: Text('修改密码'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -489,34 +552,37 @@ class _passwordChangeDialog extends StatelessWidget {
         ],
       ),
       actions: [
-        ElevatedButton(
-          onPressed: () async {
-            String oldPassword = oldPasswordController.text;
-            String newPassword = newPasswordController.text;
-            String repeatPassword = repeatPasswordController.text;
+        Padding(
+          padding: const EdgeInsets.only(right: 12,bottom: 10),
+          child: ElevatedButton(
+            onPressed: () async {
+              String oldPassword = oldPasswordController.text;
+              String newPassword = newPasswordController.text;
+              String repeatPassword = repeatPasswordController.text;
 
-            if (newPassword == repeatPassword) {
-              // 密码一致，进行提交操作
-              bool result = await myPageLogic.changePassword(getx.appSettings.value.remoteServerUrl, getx.appSettings.value.username, getx.appSettings.value.token, oldPassword, newPassword);
-              if (result){
-                var cancel1 = BotToast.showText(text:"更改密码成功，跳转至登录页面");
-                _logout();
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login', // home 页面的路由名称
-                      (route) => false, // 移除条件，始终为 false，表示移除所有页面
-                );
-              }else{
-                var cancel1 = BotToast.showText(text:"更改密码失败");
-                Navigator.of(context).pop();
+              if (newPassword == repeatPassword) {
+                // 密码一致，进行提交操作
+                bool result = await myPageLogic.changePassword(getx.appSettings.value.remoteServerUrl, getx.appSettings.value.username, getx.appSettings.value.token, oldPassword, newPassword);
+                if (result){
+                  var cancel1 = BotToast.showText(text:"更改密码成功，跳转至登录页面");
+                  _logout();
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login', // home 页面的路由名称
+                        (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                  );
+                }else{
+                  var cancel1 = BotToast.showText(text:"更改密码失败");
+                  Navigator.of(context).pop();
+                }
+
+                // Navigator.of(context).pop(); // 关闭对话框
+              } else {
+                var cancel1 = BotToast.showText(text:"重复输入新密码不一致");
               }
-
-              // Navigator.of(context).pop(); // 关闭对话框
-            } else {
-              var cancel1 = BotToast.showText(text:"重复输入新密码不一致");
-            }
-          },
-          child: Text('提交'),
+            },
+            child: Text('提交'),
+          ),
         ),
       ],
     );
