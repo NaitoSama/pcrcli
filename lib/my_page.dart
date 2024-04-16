@@ -15,6 +15,7 @@ class MyPage extends StatelessWidget {
   var homeData = Get.find<HomeData>();
   var myPageLogic = MyPageLogic();
   final TextEditingController archiveNameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
 
   void _logout(){
     getx.appSettings.value.token = '';
@@ -305,7 +306,7 @@ class MyPage extends StatelessWidget {
                                         ),
                                         const Padding(
                                           padding: EdgeInsets.only(top: 20),
-                                          child: Text('你确定要将记录归档并重置会战吗？\n该操作无法撤销！'),
+                                          child: Text('你确定要将记录归档并重置会战吗？\n该操作不可逆！'),
                                         ),
                                       ],
                                     ),
@@ -323,10 +324,11 @@ class MyPage extends StatelessWidget {
                                         padding: const EdgeInsets.only(bottom: 10,right: 8),
                                         child: TextButton(
                                           onPressed: () async {
+                                            Navigator.pop(context);
                                             var sendReq = SendReq(1, '${getx.appSettings.value.remoteServerUrl}/v1/archiverecords',query: <String,String>{'archive_name':archiveNameController.text},token: getx.appSettings.value.token);
                                             var resp = await sendReq.send();
                                             if(resp?.statusCode == 200){
-                                              var cancel1 = BotToast.showText(text:"重置完成，重启app查看");
+                                              var cancel1 = BotToast.showText(text:"重置成功，重启app查看");
                                             }else{
                                               var cancel1 = BotToast.showText(text:"重置失败");
                                             }
@@ -354,6 +356,103 @@ class MyPage extends StatelessWidget {
                                   padding: EdgeInsets.only(left: 2,bottom: 0),
                                   child: Text(
                                     '归档记录并重置会战',
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 2),
+                                  child: Icon(Icons.keyboard_arrow_right),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                  ),
+                  Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
+                      child: Visibility(
+                        visible: (getx.appSettings.value.authority>1),
+                        child: SizedBox(
+                          height: 54,
+                          width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
+                          child: ElevatedButton(
+                            onPressed: (){
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20)
+                                    ),
+                                    elevation: 10,
+                                    title: Text('设置成员管理员权限'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextField(
+                                          controller: usernameController,
+                                          decoration: const InputDecoration(
+                                            labelText: '用户名称',
+                                          ),
+                                        ),
+                                        const Padding(
+                                          padding: EdgeInsets.only(top: 20),
+                                          child: Text('将该成员设置为管理员（没有重置会战和设置管理员权限）？'),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 10),
+                                        child: TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('不了'),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 10,right: 8),
+                                        child: TextButton(
+                                          onPressed: () async {
+                                            Navigator.pop(context);
+                                            var sendReq = SendReq(1, '${getx.appSettings.value.remoteServerUrl}/v1/updateuserauthority',query: <String,String>{'username':usernameController.text},token: getx.appSettings.value.token);
+                                            var resp = await sendReq.send();
+                                            if(resp?.statusCode == 200){
+                                              var cancel1 = BotToast.showText(text:"设置成功");
+                                            }else{
+                                              var cancel1 = BotToast.showText(text:"重置失败");
+                                            }
+                                          },
+                                          child: Text('确定'),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.white,
+                              onPrimary: Colors.black,
+                              elevation: 5,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(left: 2,bottom: 0),
+                                  child: Text(
+                                    '设成员为管理员',
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
                                       fontSize: 14,

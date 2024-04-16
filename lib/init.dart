@@ -28,7 +28,34 @@ class WSC extends GetxController{
       _handleWebsocketMessage(event);
     });
     isConnected = true;
+    await _renewMyData();
     await _getRecords();
+  }
+  Future<void> _renewMyData() async {
+    GetxSettings getxSettings = Get.find<GetxSettings>();
+    final Map<String, String> headers = {'Content-Type': 'application/json'};
+    final Map<String, String> json = {
+      'jwt': getxSettings.appSettings.value.token,
+    };
+    var response = await http.post(
+        Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/userinfo'),
+        headers: headers,
+        body: jsonEncode(json)
+    );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      // prefs.setInt('user_id', jsonResponse['user_id']);
+      // prefs.setString('username', jsonResponse['username']);
+      // prefs.setInt('user_authority', jsonResponse['user_authority']);
+      // appSettings.username = jsonResponse['username'];
+      // appSettings.authority = jsonResponse['user_authority'];
+      // box.put('settings', appSettings);
+      GetxSettings getxSettings = Get.find<GetxSettings>();
+      getxSettings.appSettings.value.username = jsonResponse['username'];
+      getxSettings.appSettings.value.authority = jsonResponse['user_authority'];
+      getxSettings.appSettings.value.isLoggedIn = true;
+      getxSettings.updateSettings(getxSettings.appSettings.value);
+    }
   }
 
   void _handleWebsocketMessage(dynamic message) async {

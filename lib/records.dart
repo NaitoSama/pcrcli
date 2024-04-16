@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/settings.dart';
 
+import 'common.dart';
+
 class RecordsPage extends StatelessWidget {
   RecordsPage({super.key});
   var homeData = Get.find<HomeData>();
@@ -162,6 +164,7 @@ class recordsCard extends StatelessWidget {
   int id;
   var homeData = Get.find<HomeData>();
   var getx = Get.find<GetxSettings>();
+  var recordsC = Get.find<recordsController>();
   recordsCard({super.key,required this.username,required this.bossID,required this.time,required this.damage,required this.id});
 
   String _parse_time(String time) {
@@ -187,7 +190,50 @@ class recordsCard extends StatelessWidget {
               children: [
                 SlidableAction(
                   borderRadius: BorderRadius.circular(15),
-                  onPressed: (_){},
+                  onPressed: (_){
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)
+                          ),
+                          elevation: 10,
+                          title: const Text('删除确认'),
+                          content: Text('确定要删除用户"$username"在${_parse_time(time)}对boss$bossID造成$damage伤害的记录吗？\n该操作不可逆'),
+                          actions: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('不了'),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10,right: 8),
+                              child: TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  var sendReq = SendReq(1, '${getx.appSettings.value.remoteServerUrl}/v1/deleterecord',query: <String,String>{'record_id':'$id'},token: getx.appSettings.value.token);
+                                  var resp = await sendReq.send();
+                                  if(resp?.statusCode == 200){
+                                    for (int i=0;i<homeData.records.length;i++){if(homeData.records[i].id==id){homeData.records.removeAt(i);}}
+                                    for (int i=0;i<recordsC.records.length;i++){if(recordsC.records[i].id==id){recordsC.records.removeAt(i);}}
+                                    var cancel1 = BotToast.showText(text:"删除成功");
+                                  }else{
+                                    var cancel1 = BotToast.showText(text:"重置失败");
+                                  }
+                                },
+                                child: Text('确定'),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                    );
+                  },
                   backgroundColor: const Color(0xFFFE4A49),
                   foregroundColor: Colors.white,
                   icon: Icons.delete,
