@@ -153,6 +153,7 @@ class MyPageLogic {
     var data2 = jsonDecode(jsonString2);
     for(Map<String,dynamic> i in data2){
       User user = User();
+      user.id.value = i['ID'];
       user.name.value = i['Name'];
       user.picEtag.value = i['PicETag'];
       user.picEtag128.value = i['Pic16ETag'];

@@ -25,6 +25,7 @@ class _registerState extends State<register> {
   final username = TextEditingController();
   final password = TextEditingController();
   final code = TextEditingController();
+  final getx = Get.find<GetxSettings>();
   FocusNode focusNode1 = FocusNode();
   FocusNode focusNode2 = FocusNode();
 
@@ -120,8 +121,10 @@ class _registerState extends State<register> {
     var cancel1 = BotToast.showLoading();
     if (await sendRegisterRequest(username.text, password.text, code.text)){
       cancel1();
-      WSC wsc = Get.find<WSC>();
-      await wsc.connect();
+      getx.appSettings.value.password = password.text;
+      getx.updateSettings(getx.appSettings.value);
+      // WSC wsc = Get.find<WSC>();
+      // await wsc.connect();
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home', // home 页面的路由名称

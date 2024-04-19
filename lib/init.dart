@@ -7,63 +7,83 @@ class WSC extends GetxController{
   late String url;
   late String token;
   bool dataInitComplete = false;
+  bool isTimeout = true;
+  int reconnect = 0;
+  GetxSettings getxSettings = Get.find<GetxSettings>();
+  HomeData homeData = Get.find<HomeData>();
 
+
+  void WSDispose(){
+    ws.sink.close();
+  }
 
   Future<void> connect() async {
-    GetxSettings getxSettings = Get.find<GetxSettings>();
+    print('ws is connecting...');
+    isTimeout = true;
     url = getxSettings.appSettings.value.remoteServerUrl;
     token = getxSettings.appSettings.value.token;
     if(!getxSettings.appSettings.value.isLoggedIn||!getxSettings.appSettings.value.isUrlConfirmed) {
         throw Exception('url or token is not initialized!');
       }
-    ws = IOWebSocketChannel.connect(
-        '${url.replaceFirst('http', 'ws')}/v1/ws',
-        headers: {
-          HttpHeaders.cookieHeader:'pekoToken=$token'
-        }
-    );
+      ws = IOWebSocketChannel.connect(
+          '${url.replaceFirst('http', 'ws')}/v1/ws',
+          headers: {
+            HttpHeaders.cookieHeader:'pekoToken=$token'
+          }
+      );
 
-    ws.stream.listen((event) {
+
+    // await ws.ready;
+    var stream = ws.stream.listen((event) {
       // print(event);
       _handleWebsocketMessage(event);
-    });
+    },
+      onError: (error){print(error);},
+    );
+
+    if(!await _connectionDetection()){WSDispose();await connect();return;}
+
     isConnected = true;
+    homeData.isWSValid.value = true;
+    _heartbeat();
     await _renewMyData();
     await _getRecords();
   }
   Future<void> _renewMyData() async {
     GetxSettings getxSettings = Get.find<GetxSettings>();
-    final Map<String, String> headers = {'Content-Type': 'application/json'};
-    final Map<String, String> json = {
-      'jwt': getxSettings.appSettings.value.token,
-    };
-    var response = await http.post(
-        Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/userinfo'),
+    final Map<String, String> headers = {'Cookie': 'pekoToken=${getxSettings.appSettings.value.token}'};
+    var response = await http.get(
+        Uri.parse('${getxSettings.appSettings.value.remoteServerUrl}/v1/users?users=${getxSettings.appSettings.value.username}'),
         headers: headers,
-        body: jsonEncode(json)
     );
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      // prefs.setInt('user_id', jsonResponse['user_id']);
-      // prefs.setString('username', jsonResponse['username']);
-      // prefs.setInt('user_authority', jsonResponse['user_authority']);
-      // appSettings.username = jsonResponse['username'];
-      // appSettings.authority = jsonResponse['user_authority'];
-      // box.put('settings', appSettings);
+      var jsonResponse = jsonDecode(response.body);
       GetxSettings getxSettings = Get.find<GetxSettings>();
-      getxSettings.appSettings.value.username = jsonResponse['username'];
-      getxSettings.appSettings.value.authority = jsonResponse['user_authority'];
-      getxSettings.appSettings.value.isLoggedIn = true;
-      getxSettings.updateSettings(getxSettings.appSettings.value);
+      if(getxSettings.appSettings.value.authority != jsonResponse[0]['Permission']){
+        await getNewTokenCircle();
+      }
     }
   }
 
   void _handleWebsocketMessage(dynamic message) async {
     var getx = Get.find<GetxSettings>();
     var homeData = Get.find<HomeData>();
-    final data = jsonDecode(message);
-    if (data is Map){
-      if(data.containsKey('WhoIsIn')){
+    final body = jsonDecode(message);
+    var data = body["Data"];
+    switch(body["type"]){
+      case "promotion_user":{
+        if(getx.appSettings.value.username == body["Data"]){
+          getNewTokenCircle();
+        }
+        break;
+      }
+
+      case "heartbeat":{
+        isTimeout = false;
+        break;
+      }
+
+      case "boss_update":{
         int bossID = data['ID'];
         BossInfo boss = homeData.bosses[bossID - 1];
         boss.stage.value = data['Stage'];
@@ -73,7 +93,10 @@ class WSC extends GetxController{
         boss.attacking.value = data['WhoIsIn'];
         boss.tree.value = (data['Tree'] as String).split('|');
         boss.picETag.value = data['PicETag'];
-      }else if (data.containsKey('BeforeBossStage')){
+        break;
+      }
+
+      case "record_append":{
         if (recordsUniquenessCheck.contains(data['ID'])){
           return;
         }
@@ -103,6 +126,13 @@ class WSC extends GetxController{
         record.canUndo = data['CanUndo'];
         record.damage = data['Damage'];
         homeData.appendRecord(record);
+        break;
+      }
+
+      case "record_delete":{
+        int recordID = data["ID"];
+        homeData.deleteRecord(recordID);
+        break;
       }
     }
   }
@@ -120,7 +150,7 @@ class WSC extends GetxController{
     http.StreamedResponse response = await request.send();
 
 
-    if (response.contentLength! > 4){
+    if (response.contentLength == null || response.contentLength! > 4){
       var jsonString = await response.stream.bytesToString();
       var data = jsonDecode(jsonString);
       List<Record> records = [];
@@ -148,6 +178,7 @@ class WSC extends GetxController{
       var data2 = jsonDecode(jsonString2);
       for (Map<String, dynamic> i in data2) {
         User user = User();
+        user.id.value = i['ID'];
         user.name.value = i['Name'];
         user.picEtag.value = i['PicETag'];
         user.picEtag128.value = i['Pic16ETag'];
@@ -204,6 +235,7 @@ class WSC extends GetxController{
       var data2 = jsonDecode(jsonString2);
       for (Map<String, dynamic> i in data2) {
         User user = User();
+        user.id.value = i['ID'];
         user.name.value = i['Name'];
         user.picEtag.value = i['PicETag'];
         user.picEtag128.value = i['Pic16ETag'];
@@ -243,5 +275,89 @@ class WSC extends GetxController{
     // data = jsonDecode(jsonString);
 
     dataInitComplete = true;
+  }
+  void _sendHeartbeat() {
+    Map<String,String> jsonData = {"type":"heartbeat","Data":"nothing","token":getxSettings.appSettings.value.token};
+    final jsonString = jsonEncode(jsonData);
+    ws.sink.add(jsonString);
+  }
+  Future<void> _heartbeat() async {
+    while(true){
+      isTimeout = true;
+      _sendHeartbeat();
+      await Future.delayed(const Duration(seconds: 5));
+      if(isTimeout){
+        homeData.isWSValid.value = false;
+        print('reconnecting...');
+        await connect();
+        // todo reconnect or something to remind user
+        return;
+      }
+    }
+  }
+  Future<bool> _connectionDetection() async {
+    // isTimeout = true;
+    _sendHeartbeat();
+    for(int i=0;i<30;i++){ // 3 seconds detection
+      print(i);
+      if(!isTimeout){return true;}
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+    return false;
+  }
+}
+
+Future<bool> getNewToken() async {
+  GetxSettings getx = Get.find<GetxSettings>();
+  final url = Uri.parse('${getx.appSettings.value.remoteServerUrl}/login'); // 替换成你的登录接口URL
+  final Map<String, String> headers = {'Content-Type': 'application/json'};
+
+  final Map<String, dynamic> requestBody = {
+    'username': getx.appSettings.value.username,
+    'password': getx.appSettings.value.password,
+  };
+
+    var response = await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode == 200) {
+      String cookie = response.headers['set-cookie'] ?? '';
+      var temp = cookie.split('pekoToken=');
+      cookie = temp[temp.length-1].split(';')[0];
+      getx.appSettings.value.token = cookie;
+
+      final Map<String, String> json = {
+        'jwt': cookie,
+      };
+      response = await http.post(
+          Uri.parse('${getx.appSettings.value.remoteServerUrl}/userinfo'),
+          headers: headers,
+          body: jsonEncode(json)
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        getx.appSettings.value.username = jsonResponse['username'];
+        getx.appSettings.value.authority = jsonResponse['user_authority'];
+        getx.appSettings.value.isLoggedIn = true;
+        getx.updateSettings(getx.appSettings.value);
+        return true;
+      }else{
+        return false;
+      }
+
+
+    } else {
+      return false;
+    }
+}
+
+Future<void> getNewTokenCircle() async {
+  bool result = await getNewToken();
+  if(!result){
+    await Future.delayed(const Duration(seconds: 1));
+    await getNewTokenCircle();
   }
 }

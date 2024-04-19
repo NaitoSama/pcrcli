@@ -24,6 +24,7 @@ class login extends StatefulWidget {
 class _loginState extends State<login> {
   final username = TextEditingController();
   final password = TextEditingController();
+  final getx = Get.find<GetxSettings>();
   FocusNode focusNode1 = FocusNode();
   Future<bool> sendLoginRequest(String username, String password) async {
     // final prefs = await SharedPreferences.getInstance();
@@ -117,8 +118,10 @@ class _loginState extends State<login> {
     var cancel1 = BotToast.showLoading();
     if(await sendLoginRequest(username.text,password.text)){
       cancel1();
-      WSC wsc = Get.find<WSC>();
-      await wsc.connect();
+      getx.appSettings.value.password = password.text;
+      getx.updateSettings(getx.appSettings.value);
+      // WSC wsc = Get.find<WSC>();
+      // await wsc.connect();
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home', // home 页面的路由名称

@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -31,7 +32,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await hiveInit();
   var routeNum = await initState();
-  await wsInit();
+  wsInit();
   runApp(MyApp(routeNum));
 }
 
@@ -84,7 +85,10 @@ Future<void> wsInit() async {
   try{
     await wsc.connect();
   }catch(e){
-    print(e);
+    // print(e);
+    await Future.delayed(Duration(seconds: 3));
+    await wsInit();
+    return;
   }
 }
 
@@ -98,6 +102,7 @@ class HomeData extends GetxController {
     BossInfo(),
   ];
   Map<String,User> users = {};
+  RxBool isWSValid = false.obs;
     // BossInfo(bossID: 1).obs,
     // BossInfo(bossID: 2).obs,
     // BossInfo(bossID: 3).obs,
@@ -155,12 +160,23 @@ class HomeData extends GetxController {
   void appendRecord(Record data){
     records.add(data);
   }
+  void deleteRecord(int recordID){
+    for(int i=0;i<records.length;i++){
+      int j = records.length-1 - i;
+      if(records[j].id == recordID){
+        var tempList = records;
+        if(i == 0){records.value = tempList.sublist(0,j);}else{records.value = tempList.sublist(0,j);records.addAll(tempList.sublist(j,tempList.length-1));}
+        break;
+      }
+    }
+  }
   void initRecord(List<Record> data){
     records.value = data;
   }
 }
 
 class User {
+  RxInt id = 0.obs;
   RxString name = ''.obs;
   RxString picEtag = ''.obs;
   RxString picEtag128 = ''.obs;

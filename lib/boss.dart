@@ -58,7 +58,7 @@ class _bossPageState extends State<bossPage> {
       }
       if (wsc.isConnected) print('connected');
       if (wsc.dataInitComplete) print('data init');
-      sleep(Duration(seconds: 1));
+      await Future.delayed(Duration(seconds: 1));
     }
 
     // // SharedPreferences prefs = await SharedPreferences.getInstance();

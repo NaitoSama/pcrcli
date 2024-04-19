@@ -26,13 +26,15 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..authority = fields[6] as int
       ..token = fields[7] as String
       ..eTagToPic = (fields[9] as Map)
-          .map((dynamic k, dynamic v) => MapEntry(k as String, v as Uint8List));
+          .map((dynamic k, dynamic v) => MapEntry(k as String, v as Uint8List))
+      ..id = fields[10] as int
+      ..password = fields[11] as String;
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.getIndex)
       ..writeByte(1)
@@ -50,7 +52,11 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(7)
       ..write(obj.token)
       ..writeByte(9)
-      ..write(obj.eTagToPic);
+      ..write(obj.eTagToPic)
+      ..writeByte(10)
+      ..write(obj.id)
+      ..writeByte(11)
+      ..write(obj.password);
   }
 
   @override

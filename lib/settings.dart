@@ -28,6 +28,10 @@ class AppSettings {
   // List<String> bossPicETag = ['','','','',''];
   @HiveField(9)
   Map<String, Uint8List> eTagToPic = {};
+  @HiveField(10)
+  int id = 0;
+  @HiveField(11)
+  String password = '';
 
   void initIndex(){
     for(int i = 1;i<=7;i++){
