@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:intl/intl.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/settings.dart';
+import 'package:photo_view/photo_view.dart';
 
 import 'common.dart';
 
@@ -265,14 +267,37 @@ class recordsCard extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: homeData.users[username]?.picEtag.value==''?Image.asset(
-                              'images/64135784.png',
-                              fit: BoxFit.cover,
-                            ):Image.memory(
-                                getx.appSettings.value.eTagToPic[homeData.users[username]?.picEtag.value]!,
+                          GestureDetector(
+                            onTap: (){
+                              if(homeData.users[username]?.picEtag.value!=''){
+                                showDialog(context: context, builder: (BuildContext context){
+                                  return GestureDetector(
+                                    onTap: (){Navigator.of(context).pop();},
+                                    onLongPress: () async {
+                                      int timestamp = DateTime.now().millisecondsSinceEpoch;
+                                      var result = await ImageGallerySaver.saveImage(getx.appSettings.value.eTagToPic[homeData.users[username]?.picEtag.value]!,name: '${timestamp}_$username',quality: 100);
+                                      if(result['isSuccess'] == true){
+                                        var ok = BotToast.showText(text: '保存成功');
+                                      }else{
+                                        var fail = BotToast.showText(text: '保存失败');
+                                      }
+                                    },
+                                    child: PhotoView(
+                                        imageProvider:MemoryImage(getx.appSettings.value.eTagToPic[homeData.users[username]?.picEtag.value]!)
+                                    ),
+                                  );
+                                });
+                              }
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: homeData.users[username]?.picEtag.value==''?Image.asset(
+                                'images/64135784.png',
                                 fit: BoxFit.cover,
+                              ):Image.memory(
+                                  getx.appSettings.value.eTagToPic[homeData.users[username]?.picEtag.value]!,
+                                  fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ],
@@ -305,12 +330,33 @@ class recordsCard extends StatelessWidget {
                       height: MediaQuery.of(context).size.height*0.07,
                       child: Column(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.memory(
-                              getx.appSettings.value.eTagToPic[homeData.bosses[bossID-1].picETag]!,
-                              fit: BoxFit.cover,
-                            )
+                          GestureDetector(
+                            onTap: (){
+                                showDialog(context: context, builder: (BuildContext context){
+                                  return GestureDetector(
+                                    onTap: (){Navigator.of(context).pop();},
+                                    onLongPress: () async {
+                                      int timestamp = DateTime.now().millisecondsSinceEpoch;
+                                      var result = await ImageGallerySaver.saveImage(getx.appSettings.value.eTagToPic[homeData.bosses[bossID-1].picETag]!,name: '${timestamp}_boss$bossID',quality: 100);
+                                      if(result['isSuccess'] == true){
+                                        var ok = BotToast.showText(text: '保存成功');
+                                      }else{
+                                        var fail = BotToast.showText(text: '保存失败');
+                                      }
+                                    },
+                                    child: PhotoView(
+                                        imageProvider:MemoryImage(getx.appSettings.value.eTagToPic[homeData.bosses[bossID-1].picETag]!)
+                                    ),
+                                  );
+                                });
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.memory(
+                                getx.appSettings.value.eTagToPic[homeData.bosses[bossID-1].picETag]!,
+                                fit: BoxFit.cover,
+                              )
+                            ),
                           ),
                         ],
                       ),

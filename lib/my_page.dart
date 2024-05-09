@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:pcrcli/common.dart';
 import 'package:pcrcli/main.dart';
 import 'package:pcrcli/my_page.logic.dart';
 import 'package:pcrcli/settings.dart';
 import 'package:http/http.dart' as http;
+import 'package:photo_view/photo_view.dart';
 
 class MyPage extends StatelessWidget {
   MyPage({super.key});
@@ -98,11 +100,32 @@ class MyPage extends StatelessWidget {
                               builder: (context, snapshot){
                                 if (snapshot.connectionState == ConnectionState.done) {
                                   if(snapshot.data == true){
-                                    return Image.memory(
-                                      getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!,
-                                      width: 16,
-                                      height: 16,
-                                      fit: BoxFit.cover,
+                                    return GestureDetector(
+                                      onTap: (){
+                                          showDialog(context: context, builder: (BuildContext context){
+                                            return GestureDetector(
+                                              onTap: (){Navigator.of(context).pop();},
+                                              onLongPress: () async {
+                                                int timestamp = DateTime.now().millisecondsSinceEpoch;
+                                                var result = await ImageGallerySaver.saveImage(getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!,name: '${timestamp}_${getx.appSettings.value.username}',quality: 100);
+                                                if(result['isSuccess'] == true){
+                                                  var ok = BotToast.showText(text: '保存成功');
+                                                }else{
+                                                  var fail = BotToast.showText(text: '保存失败');
+                                                }
+                                              },
+                                              child: PhotoView(
+                                                  imageProvider:MemoryImage(getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!)
+                                              ),
+                                            );
+                                          });
+                                      },
+                                      child: Image.memory(
+                                        getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!,
+                                        width: 16,
+                                        height: 16,
+                                        fit: BoxFit.cover,
+                                      ),
                                     );
                                   }else{
                                     return Image.asset(
