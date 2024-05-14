@@ -1,4 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -19,6 +20,7 @@ class RecordsPage extends StatelessWidget {
   var bossList = ['1','2','3','4','5','未选择'];
   var userList = <String>['未选择'];
   late int visibleCount;
+  final TextEditingController textEditingController = TextEditingController();
 
   List<String> _bossOrUserList() {
     if (recordsC.method.value=='bossid'){return bossList;}
@@ -63,7 +65,7 @@ class RecordsPage extends StatelessWidget {
                 // Text('筛选:'),
                 Container(
                   width: 94,
-                  child: DropdownButton<String>(
+                  child: DropdownButton2<String>(
                     value: recordsC.method.value==''?'all':recordsC.method.value,
                     onChanged: (String? newValue) {
                       recordsC.method.value = newValue!;
@@ -80,12 +82,35 @@ class RecordsPage extends StatelessWidget {
                         ),
                       );
                     }).toList(),
+                    buttonStyleData: const ButtonStyleData(
+                      height: 50,
+                      width: 160,
+                      padding: EdgeInsets.only(left: 14, right: 14),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      maxHeight: 200,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        // color: Colors.redAccent,
+                      ),
+                      offset: const Offset(-20, 0),
+                      scrollbarTheme: ScrollbarThemeData(
+                        radius: const Radius.circular(40),
+                        thickness: MaterialStateProperty.all(6),
+                        thumbVisibility: MaterialStateProperty.all(true),
+                      ),
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      height: 40,
+                      padding: EdgeInsets.only(left: 14, right: 14),
+                    ),
                   ),
                 ),
                 // 选择关键词内容的下拉菜单
                 Container(
                   width: 100,
-                  child: DropdownButton<String>(
+                  child: DropdownButton2<String>(
                     value: recordsC.selected.value,
                     onChanged: (String? newValue) {
                       recordsC.selected.value = newValue!;
@@ -97,6 +122,62 @@ class RecordsPage extends StatelessWidget {
                         child: Container(width: 100,child: Text(value,overflow: TextOverflow.ellipsis,)),
                       );
                     }).toList(),
+                    dropdownSearchData: DropdownSearchData(
+                      searchController: textEditingController,
+                      searchInnerWidgetHeight: 50,
+                      searchInnerWidget: Container(
+                        height: 50,
+                        padding: const EdgeInsets.only(
+                          top: 8,
+                          bottom: 4,
+                          right: 8,
+                          left: 8,
+                        ),
+                        child: TextFormField(
+                          expands: true,
+                          maxLines: null,
+                          controller: textEditingController,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            hintText: 'Search for an item...',
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      searchMatchFn: (item, searchValue) {
+                        return item.value.toString().contains(searchValue);
+                      },
+                    ),
+                    buttonStyleData: const ButtonStyleData(
+                      height: 50,
+                      width: 160,
+                      padding: EdgeInsets.only(left: 14, right: 14),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      maxHeight: 200,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        // color: Colors.redAccent,
+                      ),
+                      offset: const Offset(-20, 0),
+                      scrollbarTheme: ScrollbarThemeData(
+                        radius: const Radius.circular(40),
+                        thickness: MaterialStateProperty.all(6),
+                        thumbVisibility: MaterialStateProperty.all(true),
+                      ),
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      height: 40,
+                      padding: EdgeInsets.only(left: 14, right: 14),
+                    ),
                   ),
                 ),
                 Container(
