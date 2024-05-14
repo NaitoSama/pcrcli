@@ -33,35 +33,37 @@ class Home extends StatelessWidget {
         centerTitle: false,
         elevation: 0,
       ),
-      bottomNavigationBar: Obx(() => BottomNavigationBar(
-        iconSize: 28,
-        selectedFontSize: 10,
-        unselectedFontSize: 10,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        currentIndex: getx.homeSelectedIndex.value,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.shield_sharp),label: '会战'),
-          BottomNavigationBarItem(icon: Icon(Icons.person),label: '我的'),
-        ],
-        onTap: (int index){
-          switch(index){
-            case 0: {
-              if(getx.homeSelectedIndex.value == 0){
-                break;
+      bottomNavigationBar: Obx(() => Container(
+        child: BottomNavigationBar(
+          iconSize: 28,
+          selectedFontSize: 10,
+          unselectedFontSize: 10,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          currentIndex: getx.homeSelectedIndex.value,
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.shield_sharp),label: '会战'),
+            BottomNavigationBarItem(icon: Icon(Icons.person),label: '我的'),
+          ],
+          onTap: (int index){
+            switch(index){
+              case 0: {
+                if(getx.homeSelectedIndex.value == 0){
+                  break;
+                }
+                getx.homeSelectedIndex.value = 0;
+                // Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);break;
               }
-              getx.homeSelectedIndex.value = 0;
-              // Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);break;
-            }
-            case 1: {
-              if(getx.homeSelectedIndex.value == 1){
-                break;
+              case 1: {
+                if(getx.homeSelectedIndex.value == 1){
+                  break;
+                }
+                getx.homeSelectedIndex.value = 1;
+                // Navigator.pushNamedAndRemoveUntil(context, '/my_page', (route) => false);break;
               }
-              getx.homeSelectedIndex.value = 1;
-              // Navigator.pushNamedAndRemoveUntil(context, '/my_page', (route) => false);break;
             }
-          }
-        },
+          },
+        ),
       )),
       body: Obx(() => _buildBody()),
     );

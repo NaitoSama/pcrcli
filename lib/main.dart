@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pcrcli/chart.dart';
 import 'package:pcrcli/global.dart';
 import 'package:pcrcli/records.dart';
 import 'package:pcrcli/register.dart';
@@ -274,6 +275,9 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         builder: BotToastInit(),
         navigatorObservers: [BotToastNavigatorObserver()],
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFFFAFAFA)),
+        ),
 
         // theme: ThemeData(
         //   // This is the theme of your application.
@@ -302,6 +306,7 @@ class MyApp extends StatelessWidget {
           '/home': (context) => Home(),
           '/my_page': (context) => MyPage(),
           '/records': (context) => RecordsPage(),
+          '/chart': (context) => ChartPage(),
         },
         initialRoute: homePage,
         // home: home,

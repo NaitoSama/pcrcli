@@ -259,118 +259,127 @@ class _bossPageState extends State<bossPage> {
             }
           } else {
             // 请求未结束，显示loading
-            return Center(child: CircularProgressIndicator());
+            return Container(color:Color(0xFFFAFAFA),child: Center(child: CircularProgressIndicator()));
           }
 
 
 
-          return ListView(
+          return Container(
+            color: Color(0xFFFAFAFA),
+            child: ListView(
 
-            // crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 公告栏
-              GestureDetector(
-                onTap: (){
-                  Navigator.pushNamed(
-                    context,
-                    '/records',
-                  );
-                },
-                child: recordBoard()
-              ),
-              // Boss 状态格子
-
-              GestureDetector (
-                  onTap: () => showDialog(
-
-              context: context,
-              builder: (BuildContext context) {
-              return bossCMDDialog(
-                  contentWidget: bossCMD(
-                    bossID: 1,
-                    token: token,
-                  )
-              );
-              },
-              ),
-                  child: bossCard(bossID: 1,bossImg: '$url/pic/1.jpg',url: url,)
-              ),
-              GestureDetector (
-                  onTap: () => showDialog(
-
-                    context: context,
-                    builder: (BuildContext context) {
-                      return bossCMDDialog(
-                          contentWidget: bossCMD(
-                            bossID: 2,
-                            token: token,
-                          )
-                      );
-                    },
-                  ),
-                  child: bossCard(bossID: 2,bossImg: '$url/pic/2.jpg',url: url,)
-              ),
-              GestureDetector (
-                  onTap: () => showDialog(
-
-                    context: context,
-                    builder: (BuildContext context) {
-                      return bossCMDDialog(
-                          contentWidget: bossCMD(
-                            bossID: 3,
-                            token: token,
-                          )
-                      );
-                    },
-                  ),
-                  child: bossCard(bossID: 3,bossImg: '$url/pic/3.jpg',url: url,)
-              ),
-              GestureDetector (
-                  onTap: () => showDialog(
-
-                    context: context,
-                    builder: (BuildContext context) {
-                      return bossCMDDialog(
-                          contentWidget: bossCMD(
-                            bossID: 4,
-                            token: token,
-                          )
-                      );
-                    },
-                  ),
-                  child: bossCard(bossID: 4,bossImg: '$url/pic/4.jpg',url: url,)
-              ),
-              GestureDetector (
-                  onTap: () => showDialog(
-
-                    context: context,
-                    builder: (BuildContext context) {
-                      return bossCMDDialog(
-                          contentWidget: bossCMD(
-                            bossID: 5,
-                            token: token,
-
-                          )
-                      );
-                    },
-                  ),
-                  child: bossCard(bossID: 5,bossImg: '$url/pic/5.jpg',url: url,)
-              ),
-              Visibility(
-                visible: debugMode,
-                child: ElevatedButton(
-                    onPressed: (){
-                      // Provider.of<AppState>(context, listen: false).appendRecord('test');
-                      var homeData = Get.find<HomeData>();
-                      Record record = Record();
-                      record.text = 'test';
-                      homeData.appendRecord(record);
-                    },
-                    child: Text('add record board test')
+              // crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 公告栏
+                GestureDetector(
+                  onTap: (){
+                    Navigator.pushNamed(
+                      context,
+                      '/records',
+                    );
+                  },
+                  onLongPress: (){
+                    Navigator.pushNamed(
+                      context,
+                      '/chart',
+                    );
+                  },
+                  child: recordBoard(),
                 ),
-              ),
-              Visibility(visible: debugMode, child: Text('${getxSettings.appSettings.value.remoteServerUrl},${getxSettings.appSettings.value.username}${getxSettings.appSettings.value.authority},${getxSettings.appSettings.value.token}')),
-            ],
+                // Boss 状态格子
+
+                GestureDetector (
+                    onTap: () => showDialog(
+
+                context: context,
+                builder: (BuildContext context) {
+                return bossCMDDialog(
+                    contentWidget: bossCMD(
+                      bossID: 1,
+                      token: token,
+                    )
+                );
+                },
+                ),
+                    child: bossCard(bossID: 1,bossImg: '$url/pic/1.jpg',url: url,)
+                ),
+                GestureDetector (
+                    onTap: () => showDialog(
+
+                      context: context,
+                      builder: (BuildContext context) {
+                        return bossCMDDialog(
+                            contentWidget: bossCMD(
+                              bossID: 2,
+                              token: token,
+                            )
+                        );
+                      },
+                    ),
+                    child: bossCard(bossID: 2,bossImg: '$url/pic/2.jpg',url: url,)
+                ),
+                GestureDetector (
+                    onTap: () => showDialog(
+
+                      context: context,
+                      builder: (BuildContext context) {
+                        return bossCMDDialog(
+                            contentWidget: bossCMD(
+                              bossID: 3,
+                              token: token,
+                            )
+                        );
+                      },
+                    ),
+                    child: bossCard(bossID: 3,bossImg: '$url/pic/3.jpg',url: url,)
+                ),
+                GestureDetector (
+                    onTap: () => showDialog(
+
+                      context: context,
+                      builder: (BuildContext context) {
+                        return bossCMDDialog(
+                            contentWidget: bossCMD(
+                              bossID: 4,
+                              token: token,
+                            )
+                        );
+                      },
+                    ),
+                    child: bossCard(bossID: 4,bossImg: '$url/pic/4.jpg',url: url,)
+                ),
+                GestureDetector (
+                    onTap: () => showDialog(
+
+                      context: context,
+                      builder: (BuildContext context) {
+                        return bossCMDDialog(
+                            contentWidget: bossCMD(
+                              bossID: 5,
+                              token: token,
+
+                            )
+                        );
+                      },
+                    ),
+                    child: bossCard(bossID: 5,bossImg: '$url/pic/5.jpg',url: url,)
+                ),
+                Visibility(
+                  visible: debugMode,
+                  child: ElevatedButton(
+                      onPressed: (){
+                        // Provider.of<AppState>(context, listen: false).appendRecord('test');
+                        var homeData = Get.find<HomeData>();
+                        Record record = Record();
+                        record.text = 'test';
+                        homeData.appendRecord(record);
+                      },
+                      child: Text('add record board test')
+                  ),
+                ),
+                Visibility(visible: debugMode, child: Text('${getxSettings.appSettings.value.remoteServerUrl},${getxSettings.appSettings.value.username}${getxSettings.appSettings.value.authority},${getxSettings.appSettings.value.token}')),
+              ],
+            ),
           );
         }
       );

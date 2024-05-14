@@ -215,8 +215,7 @@ class MyPage extends StatelessWidget {
                           // 按钮点击事件
                         },
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.white,
-                          onPrimary: Colors.black,
+                          foregroundColor: Colors.black, backgroundColor: Colors.white,
                           elevation: 5,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -269,8 +268,7 @@ class MyPage extends StatelessWidget {
                             // 按钮点击事件
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.white,
-                            onPrimary: Colors.black,
+                            foregroundColor: Colors.black, backgroundColor: Colors.white,
                             elevation: 5,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -365,8 +363,7 @@ class MyPage extends StatelessWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              onPrimary: Colors.black,
+                              foregroundColor: Colors.black, backgroundColor: Colors.white,
                               elevation: 5,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),
@@ -462,8 +459,7 @@ class MyPage extends StatelessWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              onPrimary: Colors.black,
+                              foregroundColor: Colors.black, backgroundColor: Colors.white,
                               elevation: 5,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),
@@ -546,8 +542,7 @@ class MyPage extends StatelessWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.white, // 设置按钮背景颜色为白色
-                              onPrimary: Colors.black, // 设置按钮文字颜色为黑色
+                              foregroundColor: Colors.black, backgroundColor: Colors.white, // 设置按钮文字颜色为黑色
                               elevation: 5, // 设置按钮的阴影高度
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10), // 设置按钮圆角

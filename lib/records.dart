@@ -54,186 +54,189 @@ class RecordsPage extends StatelessWidget {
         centerTitle: false,
         elevation: 0,
       ),
-      body: Obx(() =>Column(
-        children: [
-          // 筛选部分
-          Container(
-            padding: EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // Text('筛选:'),
-                Container(
-                  width: 94,
-                  child: DropdownButton2<String>(
-                    value: recordsC.method.value==''?'all':recordsC.method.value,
-                    onChanged: (String? newValue) {
-                      recordsC.method.value = newValue!;
-                      recordsC.selected.value = '未选择';
-                    },
-                    items: <String>['bossid', 'username','all']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Center(
-                          child: Text(
-                            value,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                    buttonStyleData: const ButtonStyleData(
-                      height: 50,
-                      width: 160,
-                      padding: EdgeInsets.only(left: 14, right: 14),
-                    ),
-                    dropdownStyleData: DropdownStyleData(
-                      maxHeight: 200,
-                      width: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        // color: Colors.redAccent,
-                      ),
-                      offset: const Offset(-20, 0),
-                      scrollbarTheme: ScrollbarThemeData(
-                        radius: const Radius.circular(40),
-                        thickness: MaterialStateProperty.all(6),
-                        thumbVisibility: MaterialStateProperty.all(true),
-                      ),
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                      padding: EdgeInsets.only(left: 14, right: 14),
-                    ),
-                  ),
-                ),
-                // 选择关键词内容的下拉菜单
-                Container(
-                  width: 100,
-                  child: DropdownButton2<String>(
-                    value: recordsC.selected.value,
-                    onChanged: (String? newValue) {
-                      recordsC.selected.value = newValue!;
-                    },
-                    items: _bossOrUserList()
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Container(width: 100,child: Text(value,overflow: TextOverflow.ellipsis,)),
-                      );
-                    }).toList(),
-                    dropdownSearchData: DropdownSearchData(
-                      searchController: textEditingController,
-                      searchInnerWidgetHeight: 50,
-                      searchInnerWidget: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          bottom: 4,
-                          right: 8,
-                          left: 8,
-                        ),
-                        child: TextFormField(
-                          expands: true,
-                          maxLines: null,
-                          controller: textEditingController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            hintText: 'Search for an item...',
-                            hintStyle: const TextStyle(fontSize: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      searchMatchFn: (item, searchValue) {
-                        return item.value.toString().contains(searchValue);
+      body: Obx(() =>Container(
+        color: Color(0xFFFAFAFA),
+        child: Column(
+          children: [
+            // 筛选部分
+            Container(
+              padding: EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // Text('筛选:'),
+                  Container(
+                    width: 94,
+                    child: DropdownButton2<String>(
+                      value: recordsC.method.value==''?'all':recordsC.method.value,
+                      onChanged: (String? newValue) {
+                        recordsC.method.value = newValue!;
+                        recordsC.selected.value = '未选择';
                       },
-                    ),
-                    buttonStyleData: const ButtonStyleData(
-                      height: 50,
-                      width: 160,
-                      padding: EdgeInsets.only(left: 14, right: 14),
-                    ),
-                    dropdownStyleData: DropdownStyleData(
-                      maxHeight: 200,
-                      width: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        // color: Colors.redAccent,
+                      items: <String>['bossid', 'username','all']
+                          .map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Center(
+                            child: Text(
+                              value,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      buttonStyleData: const ButtonStyleData(
+                        height: 50,
+                        width: 160,
+                        padding: EdgeInsets.only(left: 14, right: 14),
                       ),
-                      offset: const Offset(-20, 0),
-                      scrollbarTheme: ScrollbarThemeData(
-                        radius: const Radius.circular(40),
-                        thickness: MaterialStateProperty.all(6),
-                        thumbVisibility: MaterialStateProperty.all(true),
+                      dropdownStyleData: DropdownStyleData(
+                        maxHeight: 200,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          // color: Colors.redAccent,
+                        ),
+                        offset: const Offset(-20, 0),
+                        scrollbarTheme: ScrollbarThemeData(
+                          radius: const Radius.circular(40),
+                          thickness: MaterialStateProperty.all(6),
+                          thumbVisibility: MaterialStateProperty.all(true),
+                        ),
                       ),
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                      padding: EdgeInsets.only(left: 14, right: 14),
+                      menuItemStyleData: const MenuItemStyleData(
+                        height: 40,
+                        padding: EdgeInsets.only(left: 14, right: 14),
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // Text('Sort by:'),
-                      IconButton(
-                        icon: Icon(Icons.sort),
-                        onPressed: () {
-                          recordsC.asc.value = !recordsC.asc.value;
+                  // 选择关键词内容的下拉菜单
+                  Container(
+                    width: 100,
+                    child: DropdownButton2<String>(
+                      value: recordsC.selected.value,
+                      onChanged: (String? newValue) {
+                        recordsC.selected.value = newValue!;
+                      },
+                      items: _bossOrUserList()
+                          .map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Container(width: 100,child: Text(value,overflow: TextOverflow.ellipsis,)),
+                        );
+                      }).toList(),
+                      dropdownSearchData: DropdownSearchData(
+                        searchController: textEditingController,
+                        searchInnerWidgetHeight: 50,
+                        searchInnerWidget: Container(
+                          height: 50,
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            bottom: 4,
+                            right: 8,
+                            left: 8,
+                          ),
+                          child: TextFormField(
+                            expands: true,
+                            maxLines: null,
+                            controller: textEditingController,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              hintText: 'Search for an item...',
+                              hintStyle: const TextStyle(fontSize: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                        searchMatchFn: (item, searchValue) {
+                          return item.value.toString().contains(searchValue);
                         },
                       ),
-                      TextButton(
-                        child: Text('时间${recordsC.asc.value==false?'逆':'正'}序',),
+                      buttonStyleData: const ButtonStyleData(
+                        height: 50,
+                        width: 160,
+                        padding: EdgeInsets.only(left: 14, right: 14),
+                      ),
+                      dropdownStyleData: DropdownStyleData(
+                        maxHeight: 200,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          // color: Colors.redAccent,
+                        ),
+                        offset: const Offset(-20, 0),
+                        scrollbarTheme: ScrollbarThemeData(
+                          radius: const Radius.circular(40),
+                          thickness: MaterialStateProperty.all(6),
+                          thumbVisibility: MaterialStateProperty.all(true),
+                        ),
+                      ),
+                      menuItemStyleData: const MenuItemStyleData(
+                        height: 40,
+                        padding: EdgeInsets.only(left: 14, right: 14),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Text('Sort by:'),
+                        IconButton(
+                          icon: Icon(Icons.sort),
+                          onPressed: () {
+                            recordsC.asc.value = !recordsC.asc.value;
+                          },
+                        ),
+                        TextButton(
+                          child: Text('时间${recordsC.asc.value==false?'逆':'正'}序',),
 
-                        onPressed: (){
-                          recordsC.asc.value = !recordsC.asc.value;
-                        },
-                      )
-                    ],
+                          onPressed: (){
+                            recordsC.asc.value = !recordsC.asc.value;
+                          },
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // 记录列表
-          Expanded(
-            child: ListView.builder(
-              itemCount: recordsC.records.length,
-              itemBuilder: (context, index) {
-                int i = 0;
-                if(recordsC.asc.value){
-                  i = index;
-                }else{
-                  i = recordsC.records.length - 1 - index;
-                }
-                if (recordsC.selected.value != '未选择'){
-                  switch(recordsC.method.value){
-                    case 'bossid': if(recordsC.selected.value != '${recordsC.records[i].attackTo}'){return const SizedBox.shrink();}
-                    case 'username': if(recordsC.selected.value != recordsC.records[i].attackFrom){return const SizedBox.shrink();}
+            // 记录列表
+            Expanded(
+              child: ListView.builder(
+                itemCount: recordsC.records.length,
+                itemBuilder: (context, index) {
+                  int i = 0;
+                  if(recordsC.asc.value){
+                    i = index;
+                  }else{
+                    i = recordsC.records.length - 1 - index;
                   }
-                }else if(recordsC.records[index].canUndo == 0){return const SizedBox.shrink();}
+                  if (recordsC.selected.value != '未选择'){
+                    switch(recordsC.method.value){
+                      case 'bossid': if(recordsC.selected.value != '${recordsC.records[i].attackTo}'){return const SizedBox.shrink();}
+                      case 'username': if(recordsC.selected.value != recordsC.records[i].attackFrom){return const SizedBox.shrink();}
+                    }
+                  }else if(recordsC.records[index].canUndo == 0){return const SizedBox.shrink();}
 
-                return recordsCard(
-                  username: recordsC.records[i].attackFrom,
-                  bossID: recordsC.records[i].attackTo,
-                  time: recordsC.records[i].createTime,
-                  damage: recordsC.records[i].damage,
-                  id: recordsC.records[i].id,
-                );
-              },
+                  return recordsCard(
+                    username: recordsC.records[i].attackFrom,
+                    bossID: recordsC.records[i].attackTo,
+                    time: recordsC.records[i].createTime,
+                    damage: recordsC.records[i].damage,
+                    id: recordsC.records[i].id,
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       )),
     );
   }
@@ -330,8 +333,7 @@ class recordsCard extends StatelessWidget {
                 var cancel1 = BotToast.showText(text:'已复制：$username');
               },
               style: ElevatedButton.styleFrom(
-                primary: Colors.white,
-                onPrimary: Colors.black,
+                foregroundColor: Colors.black, backgroundColor: Colors.white,
                 elevation: 5,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
