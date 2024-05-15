@@ -17,7 +17,7 @@ import 'common.dart';
 class ChartPage extends StatelessWidget {
   ChartPage({super.key});
   var homeData = Get.find<HomeData>();
-  late recordsController recordsC;
+  late chartController recordsC;
   var dateList = ['全部'];
   var userList = <String>['全部'];
   late int visibleCount;
@@ -46,8 +46,8 @@ class ChartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(recordsController());
-    recordsC = Get.find<recordsController>();
+    Get.put(chartController());
+    recordsC = Get.find<chartController>();
     for (String element in homeData.users.keys) {userList.add(element);}
     for (Record i in homeData.records) {
       String datetimeStr = _parse_time(i.createTime);
@@ -209,7 +209,7 @@ class ChartPage extends StatelessWidget {
 class Chart extends StatelessWidget {
   var homeData = Get.find<HomeData>();
   var getx = Get.find<GetxSettings>();
-  var recordsC = Get.find<recordsController>();
+  var recordsC = Get.find<chartController>();
   final _tooltip = TooltipBehavior(enable: true);
   late List<_ChartData> data;
 
@@ -312,7 +312,7 @@ class _ChartData {
 }
 
 
-class recordsController extends GetxController {
+class chartController extends GetxController {
   RxString method = '全部'.obs;
   RxString selected = '全部'.obs;
   RxBool asc = false.obs;
