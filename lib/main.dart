@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -6,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -46,20 +46,20 @@ Future<int> initState() async {
   var settingsBox = Hive.box('settingsBox');
   getxSettings.appSettings.value = settingsBox.get('settings');
 
-
   int routeNum = 0;
   // SharedPreferences prefs = await SharedPreferences.getInstance();
   // String url = getxSettings.appSettings.value.remoteServerUrl;
-  bool isUrl = debugMode?false:getxSettings.appSettings.value.isUrlConfirmed;
-  bool isLogin = debugMode?false:getxSettings.appSettings.value.isLoggedIn;
-  if (!isUrl){
+  bool isUrl =
+      debugMode ? false : getxSettings.appSettings.value.isUrlConfirmed;
+  bool isLogin = debugMode ? false : getxSettings.appSettings.value.isLoggedIn;
+  if (!isUrl) {
     routeNum = 0;
-  }else{
+  } else {
     routeNum = 1;
   }
   String token = getxSettings.appSettings.value.token;
   // token = debugMode? '' : token;
-  if (isLogin){
+  if (isLogin) {
     routeNum = 2;
   }
   return routeNum;
@@ -72,7 +72,7 @@ Future<void> hiveInit() async {
     ..init(path)
     ..registerAdapter(AppSettingsAdapter());
   var box = await Hive.openBox('settingsBox');
-  if (box.isEmpty){
+  if (box.isEmpty) {
     var settings = AppSettings();
     settings.initIndex();
     await box.put('settings', settings);
@@ -83,9 +83,9 @@ Future<void> hiveInit() async {
 
 Future<void> wsInit() async {
   WSC wsc = Get.find<WSC>();
-  try{
+  try {
     await wsc.connect();
-  }catch(e){
+  } catch (e) {
     // print(e);
     await Future.delayed(Duration(seconds: 3));
     await wsInit();
@@ -102,19 +102,18 @@ class HomeData extends GetxController {
     BossInfo(),
     BossInfo(),
   ];
-  Map<String,User> users = {};
+  Map<String, User> users = {};
   RxBool isWSValid = false.obs;
-    // BossInfo(bossID: 1).obs,
-    // BossInfo(bossID: 2).obs,
-    // BossInfo(bossID: 3).obs,
-    // BossInfo(bossID: 4).obs,
-    // BossInfo(bossID: 5).obs,
+  // BossInfo(bossID: 1).obs,
+  // BossInfo(bossID: 2).obs,
+  // BossInfo(bossID: 3).obs,
+  // BossInfo(bossID: 4).obs,
+  // BossInfo(bossID: 5).obs,
 
-
-  HomeData(){
-    for(int i=0;i<5;i++){
+  HomeData() {
+    for (int i = 0; i < 5; i++) {
       // BossInfo boss = BossInfo();
-      bosses[i].bossID.value = i+1;
+      bosses[i].bossID.value = i + 1;
       // bosses[i] = boss;
     }
   }
@@ -124,7 +123,7 @@ class HomeData extends GetxController {
   // var boss4 = BossInfo(bossID: 4).obs;
   // var boss5 = BossInfo(bossID: 5).obs;
 
-  void updateBoss(BossInfo bossInfo,int bossID) {
+  void updateBoss(BossInfo bossInfo, int bossID) {
     // switch (bossID){
     //   case 1:boss1.value = bossInfo;break;
     //   case 2:boss2.value = bossInfo;break;
@@ -133,45 +132,52 @@ class HomeData extends GetxController {
     //   case 5:boss5.value = bossInfo;break;
     //   default:return false;
     // }
-    if(bosses[bossID - 1].stage.value != bossInfo.stage.value){
+    if (bosses[bossID - 1].stage.value != bossInfo.stage.value) {
       bosses[bossID - 1].stage.value = bossInfo.stage.value;
     }
-    if(bosses[bossID - 1].round.value != bossInfo.round.value){
+    if (bosses[bossID - 1].round.value != bossInfo.round.value) {
       bosses[bossID - 1].round.value = bossInfo.round.value;
     }
-    if(bosses[bossID - 1].valueC.value != bossInfo.valueC.value){
+    if (bosses[bossID - 1].valueC.value != bossInfo.valueC.value) {
       bosses[bossID - 1].valueC.value = bossInfo.valueC.value;
     }
-    if(bosses[bossID - 1].valueD.value != bossInfo.valueD.value){
+    if (bosses[bossID - 1].valueD.value != bossInfo.valueD.value) {
       bosses[bossID - 1].valueD.value = bossInfo.valueD.value;
     }
-    if(bosses[bossID - 1].attacking.value != bossInfo.attacking.value){
+    if (bosses[bossID - 1].attacking.value != bossInfo.attacking.value) {
       bosses[bossID - 1].stage.value = bossInfo.stage.value;
     }
-    if(bosses[bossID - 1].tree != bossInfo.tree){
+    if (bosses[bossID - 1].tree != bossInfo.tree) {
       bosses[bossID - 1].tree = RxList<String>.from(bossInfo.tree);
     }
-    if(bosses[bossID - 1].picETag.value != bossInfo.picETag.value){
+    if (bosses[bossID - 1].picETag.value != bossInfo.picETag.value) {
       bosses[bossID - 1].picETag.value = bossInfo.picETag.value;
     }
     // bosses[bossID - 1] = bossInfo;
     // return true;
   }
 
-  void appendRecord(Record data){
+  void appendRecord(Record data) {
     records.add(data);
   }
-  void deleteRecord(int recordID){
-    for(int i=0;i<records.length;i++){
-      int j = records.length-1 - i;
-      if(records[j].id == recordID){
+
+  void deleteRecord(int recordID) {
+    for (int i = 0; i < records.length; i++) {
+      int j = records.length - 1 - i;
+      if (records[j].id == recordID) {
         var tempList = records;
-        if(i == 0){records.value = tempList.sublist(0,j);}else{records.value = tempList.sublist(0,j);records.addAll(tempList.sublist(j,tempList.length-1));}
+        if (i == 0) {
+          records.value = tempList.sublist(0, j);
+        } else {
+          records.value = tempList.sublist(0, j);
+          records.addAll(tempList.sublist(j, tempList.length - 1));
+        }
         break;
       }
     }
   }
-  void initRecord(List<Record> data){
+
+  void initRecord(List<Record> data) {
     records.value = data;
   }
 }
@@ -202,9 +208,13 @@ class BossInfo {
   RxInt round = 0.obs;
   RxInt valueC = 0.obs;
   RxInt valueD = 0.obs;
-  RxList<String> tree = [' ',].obs;
+  RxList<String> tree = [
+    ' ',
+  ].obs;
   RxString attacking = ' '.obs;
   RxString picETag = ''.obs;
+  RxBool isAttChanged = false.obs;
+  RxBool isTreeChanged = false.obs;
   // BossInfo({
   //   this.bossID = 0.obs,
   //   this.stage = 0.obs,
@@ -254,7 +264,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // StatefulWidget home = const StartUp();
     String homePage = '/startup';
-    switch(routeNum){
+    switch (routeNum) {
       case 0:
         break;
       case 1:
@@ -272,45 +282,45 @@ class MyApp extends StatelessWidget {
     //   create: (context) => AppState(),
     //   child: MaterialApp(
     return MaterialApp(
-        title: 'Flutter Demo',
-        builder: BotToastInit(),
-        navigatorObservers: [BotToastNavigatorObserver()],
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFFFAFAFA)),
-        ),
+      title: 'Flutter Demo',
+      builder: BotToastInit(),
+      navigatorObservers: [BotToastNavigatorObserver()],
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFFFAFAFA)),
+      ),
 
-        // theme: ThemeData(
-        //   // This is the theme of your application.
-        //   //
-        //   // TRY THIS: Try running your application with "flutter run". You'll see
-        //   // the application has a blue toolbar. Then, without quitting the app,
-        //   // try changing the seedColor in the colorScheme below to Colors.green
-        //   // and then invoke "hot reload" (save your changes or press the "hot
-        //   // reload" button in a Flutter-supported IDE, or press "r" if you used
-        //   // the command line to start the app).
-        //   //
-        //   // Notice that the counter didn't reset back to zero; the application
-        //   // state is not lost during the reload. To reset the state, use hot
-        //   // restart instead.
-        //   //
-        //   // This works for code too, not just values: Most code changes can be
-        //   // tested with just a hot reload.
-        //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        //   useMaterial3: true,
-        // ),
-        routes: {
-          '/startup': (context) => StartUp(),
-          '/login': (context) => login(),
-          '/register': (context) => register(),
-          // '/home': (context) => bossPage(),
-          '/home': (context) => Home(),
-          '/my_page': (context) => MyPage(),
-          '/records': (context) => RecordsPage(),
-          '/chart': (context) => ChartPage(),
-        },
-        initialRoute: homePage,
-        // home: home,
-      );
+      // theme: ThemeData(
+      //   // This is the theme of your application.
+      //   //
+      //   // TRY THIS: Try running your application with "flutter run". You'll see
+      //   // the application has a blue toolbar. Then, without quitting the app,
+      //   // try changing the seedColor in the colorScheme below to Colors.green
+      //   // and then invoke "hot reload" (save your changes or press the "hot
+      //   // reload" button in a Flutter-supported IDE, or press "r" if you used
+      //   // the command line to start the app).
+      //   //
+      //   // Notice that the counter didn't reset back to zero; the application
+      //   // state is not lost during the reload. To reset the state, use hot
+      //   // restart instead.
+      //   //
+      //   // This works for code too, not just values: Most code changes can be
+      //   // tested with just a hot reload.
+      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      //   useMaterial3: true,
+      // ),
+      routes: {
+        '/startup': (context) => StartUp(),
+        '/login': (context) => login(),
+        '/register': (context) => register(),
+        // '/home': (context) => bossPage(),
+        '/home': (context) => Home(),
+        '/my_page': (context) => MyPage(),
+        '/records': (context) => RecordsPage(),
+        '/chart': (context) => ChartPage(),
+      },
+      initialRoute: homePage,
+      // home: home,
+    );
   }
 }
 
