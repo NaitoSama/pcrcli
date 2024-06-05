@@ -15,27 +15,39 @@ class MyPage extends StatelessWidget {
   MyPage({super.key});
   var getx = Get.find<GetxSettings>();
   var homeData = Get.find<HomeData>();
+  var wsc = Get.find<WSC>();
   var myPageLogic = MyPageLogic();
   final TextEditingController archiveNameController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
 
-  void _logout(){
+  void _logout() {
+    // clean appSettings
     getx.appSettings.value.token = '';
     getx.appSettings.value.isLoggedIn = false;
     AppSettings appSettings = getx.appSettings.value;
     getx.updateSettings(appSettings);
     getx.homeSelectedIndex.value = 0;
+    // clean ws
+    wsc.ws.sink.close();
+    wsc.isConnected = false;
+    wsc.connect();
   }
 
   Future<bool> _userPic() async {
-    if (getx.appSettings.value.eTagToPic.containsKey(homeData.users[getx.appSettings.value.username]?.picEtag.value)){
+    if (getx.appSettings.value.eTagToPic.containsKey(
+        homeData.users[getx.appSettings.value.username]?.picEtag.value)) {
       return true;
-    }else if (homeData.users[getx.appSettings.value.username]?.picEtag.value == ''){
+    } else if (homeData.users[getx.appSettings.value.username]?.picEtag.value ==
+        '') {
       return false;
-    }else{
-      final response = await http.get(Uri.parse('${getx.appSettings.value.remoteServerUrl}/pic/${homeData.users[getx.appSettings.value.username]?.picEtag.value}.jpg'));
+    } else {
+      final response = await http.get(Uri.parse(
+          '${getx.appSettings.value.remoteServerUrl}/pic/${homeData.users[getx.appSettings.value.username]?.picEtag.value}.jpg'));
       if (response.statusCode == 200) {
-        getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]!.picEtag.value] = response.bodyBytes;
+        getx.appSettings.value.eTagToPic[homeData
+            .users[getx.appSettings.value.username]!
+            .picEtag
+            .value] = response.bodyBytes;
         getx.updateSettings(getx.appSettings.value);
         return true;
       } else {
@@ -43,7 +55,6 @@ class MyPage extends StatelessWidget {
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -96,50 +107,91 @@ class MyPage extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: FutureBuilder(
-                              future: _userPic(),
-                              builder: (context, snapshot){
-                                if (snapshot.connectionState == ConnectionState.done) {
-                                  if(snapshot.data == true){
-                                    return GestureDetector(
-                                      onTap: (){
-                                          showDialog(context: context, builder: (BuildContext context){
-                                            return GestureDetector(
-                                              onTap: (){Navigator.of(context).pop();},
-                                              onLongPress: () async {
-                                                int timestamp = DateTime.now().millisecondsSinceEpoch;
-                                                var result = await ImageGallerySaver.saveImage(getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!,name: '${timestamp}_${getx.appSettings.value.username}',quality: 100);
-                                                if(result['isSuccess'] == true){
-                                                  var ok = BotToast.showText(text: '保存成功');
-                                                }else{
-                                                  var fail = BotToast.showText(text: '保存失败');
-                                                }
-                                              },
-                                              child: PhotoView(
-                                                  imageProvider:MemoryImage(getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!)
-                                              ),
-                                            );
-                                          });
-                                      },
-                                      child: Image.memory(
-                                        getx.appSettings.value.eTagToPic[homeData.users[getx.appSettings.value.username]?.picEtag.value]!,
+                                future: _userPic(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.done) {
+                                    if (snapshot.data == true) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  onLongPress: () async {
+                                                    int timestamp = DateTime
+                                                            .now()
+                                                        .millisecondsSinceEpoch;
+                                                    var result = await ImageGallerySaver
+                                                        .saveImage(
+                                                            getx
+                                                                    .appSettings
+                                                                    .value
+                                                                    .eTagToPic[
+                                                                homeData
+                                                                    .users[getx
+                                                                        .appSettings
+                                                                        .value
+                                                                        .username]
+                                                                    ?.picEtag
+                                                                    .value]!,
+                                                            name:
+                                                                '${timestamp}_${getx.appSettings.value.username}',
+                                                            quality: 100);
+                                                    if (result['isSuccess'] ==
+                                                        true) {
+                                                      var ok =
+                                                          BotToast.showText(
+                                                              text: '保存成功');
+                                                    } else {
+                                                      var fail =
+                                                          BotToast.showText(
+                                                              text: '保存失败');
+                                                    }
+                                                  },
+                                                  child: PhotoView(
+                                                      imageProvider:
+                                                          MemoryImage(getx
+                                                                  .appSettings
+                                                                  .value
+                                                                  .eTagToPic[
+                                                              homeData
+                                                                  .users[getx
+                                                                      .appSettings
+                                                                      .value
+                                                                      .username]
+                                                                  ?.picEtag
+                                                                  .value]!)),
+                                                );
+                                              });
+                                        },
+                                        child: Image.memory(
+                                          getx.appSettings.value.eTagToPic[
+                                              homeData
+                                                  .users[getx.appSettings.value
+                                                      .username]
+                                                  ?.picEtag
+                                                  .value]!,
+                                          width: 16,
+                                          height: 16,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      );
+                                    } else {
+                                      return Image.asset(
+                                        'images/64135784.png',
                                         width: 16,
                                         height: 16,
                                         fit: BoxFit.cover,
-                                      ),
-                                    );
-                                  }else{
-                                    return Image.asset(
-                                      'images/64135784.png',
-                                      width: 16,
-                                      height: 16,
-                                      fit: BoxFit.cover,
-                                    );
+                                      );
+                                    }
+                                  } else {
+                                    return CircularProgressIndicator();
                                   }
-                                } else {
-                                  return CircularProgressIndicator();
-                                }
-                              }
-                            ),
+                                }),
                           ),
                         ),
                       ),
@@ -150,22 +202,28 @@ class MyPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              Characters(getx.appSettings.value.username).length>14?'${Characters(getx.appSettings.value.username).take(14)}...':getx.appSettings.value.username,
+                              Characters(getx.appSettings.value.username)
+                                          .length >
+                                      14
+                                  ? '${Characters(getx.appSettings.value.username).take(14)}...'
+                                  : getx.appSettings.value.username,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
-                              child: Obx(() => Text(
-                                '用户级别: ${(getx.appSettings.value.authority == 0)?'普通用户':((getx.appSettings.value.authority == 1)?'管理员':'超级管理员')}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),)
-                            ),
+                                padding:
+                                    EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
+                                child: Obx(
+                                  () => Text(
+                                    '用户级别: ${(getx.appSettings.value.authority == 0) ? '普通用户' : ((getx.appSettings.value.authority == 1) ? '管理员' : '超级管理员')}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                )),
                           ],
                         ),
                       ),
@@ -201,74 +259,24 @@ class MyPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 0),
-                    child: SizedBox(
-                      height: 54,
-                      width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
-                      child: ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => _passwordChangeDialog(),
-                          );
-                          // var cancel1 = BotToast.showText(text:"功能还没做捏");
-                          // 按钮点击事件
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black, backgroundColor: Colors.white,
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 2,bottom: 0),
-                              child: Text(
-                                '修改密码',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(right: 2),
-                              child: Icon(Icons.keyboard_arrow_right),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ),
-                  Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 0),
                       child: SizedBox(
                         height: 54,
-                        width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
+                        width:
+                            MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
                         child: ElevatedButton(
-                          onPressed: () async {
-                            bool result = await myPageLogic.pickImage(getx.appSettings.value.remoteServerUrl,getx.appSettings.value.token);
-                            if (result){
-                              var cancel1 = BotToast.showText(text:"上传成功");
-                              await myPageLogic.updateMyPic();
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/home', // home 页面的路由名称
-                                    (route) => false, // 移除条件，始终为 false，表示移除所有页面
-                              );
-                            }else{
-                              var cancel1 = BotToast.showText(text:"上传失败");
-                            }
-
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => _passwordChangeDialog(),
+                            );
+                            // var cancel1 = BotToast.showText(text:"功能还没做捏");
                             // 按钮点击事件
                           },
                           style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.black, backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.white,
                             elevation: 5,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -278,7 +286,64 @@ class MyPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Padding(
-                                padding: EdgeInsets.only(left: 2,bottom: 0),
+                                padding: EdgeInsets.only(left: 2, bottom: 0),
+                                child: Text(
+                                  '修改密码',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(right: 2),
+                                child: Icon(Icons.keyboard_arrow_right),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )),
+                  Padding(
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
+                      child: SizedBox(
+                        height: 54,
+                        width:
+                            MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            bool result = await myPageLogic.pickImage(
+                                getx.appSettings.value.remoteServerUrl,
+                                getx.appSettings.value.token);
+                            if (result) {
+                              var cancel1 = BotToast.showText(text: "上传成功");
+                              await myPageLogic.updateMyPic();
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                '/home', // home 页面的路由名称
+                                (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                              );
+                            } else {
+                              var cancel1 = BotToast.showText(text: "上传失败");
+                            }
+
+                            // 按钮点击事件
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.white,
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 2, bottom: 0),
                                 child: Text(
                                   '修改头像',
                                   textAlign: TextAlign.left,
@@ -296,24 +361,25 @@ class MyPage extends StatelessWidget {
                             ],
                           ),
                         ),
-                      )
-                  ),
+                      )),
                   Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
                       child: Visibility(
-                        visible: (getx.appSettings.value.authority>1),
+                        visible: (getx.appSettings.value.authority > 1),
                         child: SizedBox(
                           height: 54,
-                          width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
+                          width:
+                              MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
                           child: ElevatedButton(
-                            onPressed: (){
+                            onPressed: () {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20)
-                                    ),
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     elevation: 10,
                                     title: Text('归档确认'),
                                     content: Column(
@@ -327,13 +393,15 @@ class MyPage extends StatelessWidget {
                                         ),
                                         const Padding(
                                           padding: EdgeInsets.only(top: 20),
-                                          child: Text('你确定要将记录归档并重置会战吗？\n该操作不可逆！'),
+                                          child:
+                                              Text('你确定要将记录归档并重置会战吗？\n该操作不可逆！'),
                                         ),
                                       ],
                                     ),
                                     actions: <Widget>[
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 10),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 10),
                                         child: TextButton(
                                           onPressed: () {
                                             Navigator.of(context).pop();
@@ -342,16 +410,26 @@ class MyPage extends StatelessWidget {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 10,right: 8),
+                                        padding: const EdgeInsets.only(
+                                            bottom: 10, right: 8),
                                         child: TextButton(
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            var sendReq = SendReq(1, '${getx.appSettings.value.remoteServerUrl}/v1/archiverecords',query: <String,String>{'archive_name':archiveNameController.text},token: getx.appSettings.value.token);
+                                            var sendReq = SendReq(1,
+                                                '${getx.appSettings.value.remoteServerUrl}/v1/archiverecords',
+                                                query: <String, String>{
+                                                  'archive_name':
+                                                      archiveNameController.text
+                                                },
+                                                token: getx
+                                                    .appSettings.value.token);
                                             var resp = await sendReq.send();
-                                            if(resp?.statusCode == 200){
-                                              var cancel1 = BotToast.showText(text:"重置成功，重启app查看");
-                                            }else{
-                                              var cancel1 = BotToast.showText(text:"重置失败");
+                                            if (resp?.statusCode == 200) {
+                                              var cancel1 = BotToast.showText(
+                                                  text: "重置成功，重启app查看");
+                                            } else {
+                                              var cancel1 = BotToast.showText(
+                                                  text: "重置失败");
                                             }
                                           },
                                           child: Text('确定'),
@@ -363,7 +441,8 @@ class MyPage extends StatelessWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black, backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.white,
                               elevation: 5,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),
@@ -373,7 +452,7 @@ class MyPage extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.only(left: 2,bottom: 0),
+                                  padding: EdgeInsets.only(left: 2, bottom: 0),
                                   child: Text(
                                     '归档记录并重置会战',
                                     textAlign: TextAlign.left,
@@ -392,24 +471,25 @@ class MyPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                      )
-                  ),
+                      )),
                   Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
                       child: Visibility(
-                        visible: (getx.appSettings.value.authority>1),
+                        visible: (getx.appSettings.value.authority > 1),
                         child: SizedBox(
                           height: 54,
-                          width: MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
+                          width:
+                              MediaQuery.of(context).size.width, // 宽度为页面宽度的 80%
                           child: ElevatedButton(
-                            onPressed: (){
+                            onPressed: () {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20)
-                                    ),
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     elevation: 10,
                                     title: Text('设置成员管理员权限'),
                                     content: Column(
@@ -423,13 +503,15 @@ class MyPage extends StatelessWidget {
                                         ),
                                         const Padding(
                                           padding: EdgeInsets.only(top: 20),
-                                          child: Text('将该成员设置为管理员（没有重置会战和设置管理员权限）？'),
+                                          child: Text(
+                                              '将该成员设置为管理员（没有重置会战和设置管理员权限）？'),
                                         ),
                                       ],
                                     ),
                                     actions: <Widget>[
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 10),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 10),
                                         child: TextButton(
                                           onPressed: () {
                                             Navigator.of(context).pop();
@@ -438,16 +520,26 @@ class MyPage extends StatelessWidget {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 10,right: 8),
+                                        padding: const EdgeInsets.only(
+                                            bottom: 10, right: 8),
                                         child: TextButton(
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            var sendReq = SendReq(1, '${getx.appSettings.value.remoteServerUrl}/v1/updateuserauthority',query: <String,String>{'username':usernameController.text},token: getx.appSettings.value.token);
+                                            var sendReq = SendReq(1,
+                                                '${getx.appSettings.value.remoteServerUrl}/v1/updateuserauthority',
+                                                query: <String, String>{
+                                                  'username':
+                                                      usernameController.text
+                                                },
+                                                token: getx
+                                                    .appSettings.value.token);
                                             var resp = await sendReq.send();
-                                            if(resp?.statusCode == 200){
-                                              var cancel1 = BotToast.showText(text:"设置成功");
-                                            }else{
-                                              var cancel1 = BotToast.showText(text:"重置失败");
+                                            if (resp?.statusCode == 200) {
+                                              var cancel1 = BotToast.showText(
+                                                  text: "设置成功");
+                                            } else {
+                                              var cancel1 = BotToast.showText(
+                                                  text: "重置失败");
                                             }
                                           },
                                           child: Text('确定'),
@@ -459,7 +551,8 @@ class MyPage extends StatelessWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black, backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.white,
                               elevation: 5,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),
@@ -469,7 +562,7 @@ class MyPage extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.only(left: 2,bottom: 0),
+                                  padding: EdgeInsets.only(left: 2, bottom: 0),
                                   child: Text(
                                     '设成员为管理员',
                                     textAlign: TextAlign.left,
@@ -488,8 +581,7 @@ class MyPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                      )
-                  ),
+                      )),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 20),
                     child: Row(
@@ -500,20 +592,21 @@ class MyPage extends StatelessWidget {
                           width: 100,
                           height: 37,
                           child: ElevatedButton(
-                            onPressed: (){
+                            onPressed: () {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20)
-                                    ),
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     elevation: 10,
                                     title: Text('登出确认'),
                                     content: Text('你确定要登出吗？'),
                                     actions: <Widget>[
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 10),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 10),
                                         child: TextButton(
                                           onPressed: () {
                                             Navigator.of(context).pop();
@@ -522,7 +615,8 @@ class MyPage extends StatelessWidget {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 10,right: 8),
+                                        padding: const EdgeInsets.only(
+                                            bottom: 10, right: 8),
                                         child: TextButton(
                                           onPressed: () {
                                             _logout();
@@ -530,7 +624,8 @@ class MyPage extends StatelessWidget {
                                             Navigator.pushNamedAndRemoveUntil(
                                               context,
                                               '/login', // home 页面的路由名称
-                                                  (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                                              (route) =>
+                                                  false, // 移除条件，始终为 false，表示移除所有页面
                                             );
                                           },
                                           child: Text('确定'),
@@ -542,10 +637,12 @@ class MyPage extends StatelessWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black, backgroundColor: Colors.white, // 设置按钮文字颜色为黑色
+                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.white, // 设置按钮文字颜色为黑色
                               elevation: 5, // 设置按钮的阴影高度
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10), // 设置按钮圆角
+                                borderRadius:
+                                    BorderRadius.circular(10), // 设置按钮圆角
                               ),
                             ),
                             child: const Text('登出'),
@@ -558,7 +655,6 @@ class MyPage extends StatelessWidget {
               ),
             ),
           )
-
         ],
       ),
       // bottomNavigationBar: BottomNavigationBar(
@@ -589,17 +685,18 @@ class _passwordChangeDialog extends StatelessWidget {
   final FocusNode repasswdFocus = FocusNode();
   final TextEditingController oldPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController repeatPasswordController = TextEditingController();
+  final TextEditingController repeatPasswordController =
+      TextEditingController();
   var getx = Get.find<GetxSettings>();
   var myPageLogic = MyPageLogic();
-  void _logout(){
+  void _logout() {
     getx.appSettings.value.token = '';
     getx.appSettings.value.isLoggedIn = false;
     AppSettings appSettings = getx.appSettings.value;
     getx.updateSettings(appSettings);
     getx.homeSelectedIndex.value = 0;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -612,7 +709,7 @@ class _passwordChangeDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            onEditingComplete: (){
+            onEditingComplete: () {
               FocusScope.of(context).requestFocus(passwdFocus);
             },
             controller: oldPasswordController,
@@ -622,7 +719,7 @@ class _passwordChangeDialog extends StatelessWidget {
             ),
           ),
           TextField(
-            onEditingComplete: (){
+            onEditingComplete: () {
               FocusScope.of(context).requestFocus(repasswdFocus);
             },
             focusNode: passwdFocus,
@@ -640,23 +737,28 @@ class _passwordChangeDialog extends StatelessWidget {
 
               if (newPassword == repeatPassword) {
                 // 密码一致，进行提交操作
-                bool result = await myPageLogic.changePassword(getx.appSettings.value.remoteServerUrl, getx.appSettings.value.username, getx.appSettings.value.token, oldPassword, newPassword);
-                if (result){
-                  var cancel1 = BotToast.showText(text:"更改密码成功，跳转至登录页面");
+                bool result = await myPageLogic.changePassword(
+                    getx.appSettings.value.remoteServerUrl,
+                    getx.appSettings.value.username,
+                    getx.appSettings.value.token,
+                    oldPassword,
+                    newPassword);
+                if (result) {
+                  var cancel1 = BotToast.showText(text: "更改密码成功，跳转至登录页面");
                   _logout();
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     '/login', // home 页面的路由名称
-                        (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                    (route) => false, // 移除条件，始终为 false，表示移除所有页面
                   );
-                }else{
-                  var cancel1 = BotToast.showText(text:"更改密码失败");
+                } else {
+                  var cancel1 = BotToast.showText(text: "更改密码失败");
                   Navigator.of(context).pop();
                 }
 
                 // Navigator.of(context).pop(); // 关闭对话框
               } else {
-                var cancel1 = BotToast.showText(text:"重复输入新密码不一致");
+                var cancel1 = BotToast.showText(text: "重复输入新密码不一致");
               }
             },
             focusNode: repasswdFocus,
@@ -670,7 +772,7 @@ class _passwordChangeDialog extends StatelessWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 12,bottom: 10),
+          padding: const EdgeInsets.only(right: 12, bottom: 10),
           child: ElevatedButton(
             onPressed: () async {
               String oldPassword = oldPasswordController.text;
@@ -679,23 +781,28 @@ class _passwordChangeDialog extends StatelessWidget {
 
               if (newPassword == repeatPassword) {
                 // 密码一致，进行提交操作
-                bool result = await myPageLogic.changePassword(getx.appSettings.value.remoteServerUrl, getx.appSettings.value.username, getx.appSettings.value.token, oldPassword, newPassword);
-                if (result){
-                  var cancel1 = BotToast.showText(text:"更改密码成功，跳转至登录页面");
+                bool result = await myPageLogic.changePassword(
+                    getx.appSettings.value.remoteServerUrl,
+                    getx.appSettings.value.username,
+                    getx.appSettings.value.token,
+                    oldPassword,
+                    newPassword);
+                if (result) {
+                  var cancel1 = BotToast.showText(text: "更改密码成功，跳转至登录页面");
                   _logout();
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     '/login', // home 页面的路由名称
-                        (route) => false, // 移除条件，始终为 false，表示移除所有页面
+                    (route) => false, // 移除条件，始终为 false，表示移除所有页面
                   );
-                }else{
-                  var cancel1 = BotToast.showText(text:"更改密码失败");
+                } else {
+                  var cancel1 = BotToast.showText(text: "更改密码失败");
                   Navigator.of(context).pop();
                 }
 
                 // Navigator.of(context).pop(); // 关闭对话框
               } else {
-                var cancel1 = BotToast.showText(text:"重复输入新密码不一致");
+                var cancel1 = BotToast.showText(text: "重复输入新密码不一致");
               }
             },
             child: Text('提交'),

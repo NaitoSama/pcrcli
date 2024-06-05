@@ -96,6 +96,7 @@ class WSC extends GetxController {
         {
           int bossID = data['ID'];
           BossInfo boss = homeData.bosses[bossID - 1];
+          // boss lock change notification
           if (boss.attacking.value != data['WhoIsIn']) {
             String title = data['WhoIsIn'] == ' ' ? '解锁BOSS' : '锁定BOSS';
             BotToast.showNotification(
@@ -114,6 +115,7 @@ class WSC extends GetxController {
             );
             // boss.isAttChanged.value = true;
           }
+          // tree change notification
           if (boss.tree.value != (data['Tree'] as String).split('|') &&
               (data['Tree'] as String).split('|') !=
                   [
