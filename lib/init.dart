@@ -106,7 +106,17 @@ class WSC extends GetxController {
                   Container(
                       height: 20,
                       width: 20,
-                      child: SvgPicture.asset('images/swords.svg')),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: data['WhoIsIn'] == ' '
+                            ? Image.asset(
+                                'images/64135784.png',
+                              )
+                            : Image.memory(
+                                getx.appSettings.value.eTagToPic[
+                                    homeData.users[data['WhoIsIn']]!.picEtag]!,
+                              ),
+                      )),
                   Text(title),
                 ],
               ),
