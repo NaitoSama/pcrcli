@@ -114,6 +114,7 @@ class HomeData extends GetxController {
     for (int i = 0; i < 5; i++) {
       // BossInfo boss = BossInfo();
       bosses[i].bossID.value = i + 1;
+      bosses[i].name.value = 'Test$i';
       // bosses[i] = boss;
     }
   }
@@ -215,6 +216,7 @@ class BossInfo {
   RxString picETag = ''.obs;
   RxBool isAttChanged = false.obs;
   RxBool isTreeChanged = false.obs;
+  RxString name = 'boss'.obs;
   // BossInfo({
   //   this.bossID = 0.obs,
   //   this.stage = 0.obs,

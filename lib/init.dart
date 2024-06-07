@@ -121,7 +121,7 @@ class WSC extends GetxController {
                 ],
               ),
               subtitle: (_) => Text(
-                  '${data['WhoIsIn'] == ' ' ? '没有人' : data['WhoIsIn']}正在攻打boss$bossID'),
+                  '${data['WhoIsIn'] == ' ' ? '没有人' : data['WhoIsIn']}正在攻打${boss.name.value}'),
             );
             // boss.isAttChanged.value = true;
           }
@@ -175,7 +175,9 @@ class WSC extends GetxController {
           } else {
             damage = '${data['Damage']}';
           }
-          record.text = '$name对boss${data['AttackTo']}造成了$damage伤害!';
+          int bossID = data['AttackTo'];
+          record.text =
+              '$name对${homeData.bosses[bossID - 1].name.value}造成了$damage伤害!';
           record.id = data['ID'];
           record.createTime = data['CreatedAt'];
           record.attackFrom = data['AttackFrom'];
@@ -272,7 +274,9 @@ class WSC extends GetxController {
         } else {
           damage = '${i['Damage']}';
         }
-        record.text = '$name对boss${i['AttackTo']}造成了$damage伤害!';
+        int bossID = i['AttackTo'];
+        record.text =
+            '$name对${homeData.bosses[bossID - 1].name.value}造成了$damage伤害!';
         record.id = i['ID'];
         record.createTime = i['CreatedAt'];
         record.attackFrom = i['AttackFrom'];
