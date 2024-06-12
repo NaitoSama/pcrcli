@@ -23,9 +23,9 @@ class RecordsPage extends StatelessWidget {
   final TextEditingController textEditingController = TextEditingController();
 
   List<String> _bossOrUserList() {
-    if (recordsC.method.value == 'bossid') {
+    if (recordsC.method.value == 'BossID') {
       return bossList;
-    } else if (recordsC.method.value == 'username') {
+    } else if (recordsC.method.value == '用户名') {
       return userList;
     } else {
       return <String>['未选择'];
@@ -77,13 +77,13 @@ class RecordsPage extends StatelessWidget {
                         width: 94,
                         child: DropdownButton2<String>(
                           value: recordsC.method.value == ''
-                              ? 'all'
+                              ? '全部'
                               : recordsC.method.value,
                           onChanged: (String? newValue) {
                             recordsC.method.value = newValue!;
                             recordsC.selected.value = '未选择';
                           },
-                          items: <String>['bossid', 'username', 'all']
+                          items: <String>['BossID', '用户名', '全部']
                               .map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -237,12 +237,12 @@ class RecordsPage extends StatelessWidget {
                       }
                       if (recordsC.selected.value != '未选择') {
                         switch (recordsC.method.value) {
-                          case 'bossid':
+                          case 'BossID':
                             if (recordsC.selected.value !=
                                 '${recordsC.records[i].attackTo}') {
                               return const SizedBox.shrink();
                             }
-                          case 'username':
+                          case '用户名':
                             if (recordsC.selected.value !=
                                 recordsC.records[i].attackFrom) {
                               return const SizedBox.shrink();

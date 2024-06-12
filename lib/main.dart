@@ -114,7 +114,7 @@ class HomeData extends GetxController {
     for (int i = 0; i < 5; i++) {
       // BossInfo boss = BossInfo();
       bosses[i].bossID.value = i + 1;
-      bosses[i].name.value = 'Test$i';
+      bosses[i].name.value = 'Boss${i + 1}';
       // bosses[i] = boss;
     }
   }
