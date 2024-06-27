@@ -41,3 +41,5 @@ class bossLPCMD extends StatelessWidget {
     );
   }
 }
+
+Future<bool> SetNotifier() async {}

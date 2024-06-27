@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
 import 'dart:typed_data';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';

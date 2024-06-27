@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -29,9 +30,11 @@ import 'my_page.dart';
 
 part 'init.dart';
 
+var notification = Notification();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await hiveInit();
+  await notification.init();
   var routeNum = await initState();
   wsInit();
   runApp(MyApp(routeNum));
@@ -411,5 +414,59 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class Notification {
+  final FlutterLocalNotificationsPlugin np = FlutterLocalNotificationsPlugin();
+
+  init() async {
+    var android = const AndroidInitializationSettings("@mipmap/ic_launcher");
+
+    await np.initialize(InitializationSettings(android: android));
+  }
+
+  void send(String title, String body, {int? notificationID, String? params}) {
+    var androidDetails = const AndroidNotificationDetails(
+      //区分不同渠道的标识
+      'channelID',
+
+      //channelName渠道描述不要随意填写，会显示在手机设置，本app 、通知列表中，
+      //规范写法根据业务：比如： 重要通知，一般通知、或者，交易通知、消息通知、等
+      'channelName',
+
+      //通知的级别
+      importance: Importance.max,
+      priority: Priority.high,
+
+      //可以单独设置每次发送通知的图标
+      // icon: ''
+
+      //显示进度条 3个参数必须同时设置
+      // progress: 19,
+      // maxProgress: 100,
+      // showProgress: true
+    );
+    var details = NotificationDetails(android: androidDetails);
+    np.show(notificationID ?? DateTime.now().millisecondsSinceEpoch >> 10,
+        title, body, details,
+        payload: params);
+  }
+
+  void cleanNotification() {
+    np.cancelAll();
+  }
+
+  void cancelNotification(int id, {String? tag}) {
+    np.cancel(id, tag: tag);
+  }
+
+  Future<void> sendANotify(
+      String title, int type, String id, String content) async {
+    Map params = {};
+    params['type'] = type;
+    params['id'] = id;
+    params['content'] = content;
+    notification.send(title, content, params: json.encode(params));
   }
 }
