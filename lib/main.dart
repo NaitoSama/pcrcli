@@ -15,6 +15,7 @@ import 'package:pcrcli/global.dart';
 import 'package:pcrcli/records.dart';
 import 'package:pcrcli/register.dart';
 import 'package:pcrcli/settings.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:web_socket_channel/io.dart';
@@ -420,7 +421,14 @@ class _MyHomePageState extends State<MyHomePage> {
 class Notification {
   final FlutterLocalNotificationsPlugin np = FlutterLocalNotificationsPlugin();
 
+  void requestNotificationPermission() async {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
+  }
+
   init() async {
+    requestNotificationPermission();
     var android = const AndroidInitializationSettings("@mipmap/ic_launcher");
 
     await np.initialize(InitializationSettings(android: android));
@@ -429,11 +437,11 @@ class Notification {
   void send(String title, String body, {int? notificationID, String? params}) {
     var androidDetails = const AndroidNotificationDetails(
       //区分不同渠道的标识
-      'channelID',
+      '1008613232',
 
       //channelName渠道描述不要随意填写，会显示在手机设置，本app 、通知列表中，
       //规范写法根据业务：比如： 重要通知，一般通知、或者，交易通知、消息通知、等
-      'channelName',
+      '消息通知',
 
       //通知的级别
       importance: Importance.max,

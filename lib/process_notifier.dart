@@ -34,12 +34,14 @@ class bossLPCMD extends StatelessWidget {
         ],
         borderRadius: BorderRadius.circular(25),
       ),
-      child: const Padding(
+      child: Padding(
         padding: EdgeInsets.all(14.0),
-        child: Text('1'),
+        child: ElevatedButton(
+            onPressed: () {
+              notification.sendANotify('test', 1, '2', 'test');
+            },
+            child: Text('1')),
       ),
     );
   }
 }
-
-Future<bool> SetNotifier() async {}
